@@ -1,4 +1,5 @@
 using LeagueScheduler.Features.Auth.Entities;
+using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Courts.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
 using LeagueScheduler.Features.Players.Entities;
@@ -14,6 +15,7 @@ namespace LeagueScheduler.Infrastructure.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<Address> Addresses => Set<Address>();
         public DbSet<Court> Courts => Set<Court>();
         public DbSet<League> Leagues => Set<League>();
         public DbSet<LeaguePlayer> LeaguePlayers => Set<LeaguePlayer>();

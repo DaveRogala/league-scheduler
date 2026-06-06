@@ -1,4 +1,5 @@
 using LeagueScheduler.Shared.Scheduling;
+using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
 
 namespace LeagueScheduler.Features.Players.Entities
@@ -11,6 +12,9 @@ namespace LeagueScheduler.Features.Players.Entities
         public PlayerRole Role { get; set; } = PlayerRole.Regular;
         public NudgePreference Nudge { get; set; } = NudgePreference.None;
         public List<DateTime> UnavailableDates { get; set; } = [];
+
+        public Guid? AddressId { get; set; }
+        public Address? Address { get; set; }
 
         public List<LeaguePlayer> LeaguePlayers { get; set; } = [];
     }
