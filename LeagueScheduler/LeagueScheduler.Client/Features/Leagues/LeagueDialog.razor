@@ -1,0 +1,77 @@
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<LeagueStrings> L
+@inject LeagueClient LeagueClient
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="_model.Name"
+                          Label="@L["Name"]"
+                          Required="true"
+                          RequiredError="@L["NameRequired"]"
+                          Immediate="true"
+                          Class="mb-3" />
+            <MudSelect @bind-Value="_model.Mode" Label="@L["Mode"]" Class="mb-3">
+                <MudSelectItem Value="LeagueMode.Recreational">@L["Recreational"]</MudSelectItem>
+                <MudSelectItem Value="LeagueMode.Competitive">@L["Competitive"]</MudSelectItem>
+            </MudSelect>
+            <MudSelect @bind-Value="_model.MatchType" Label="@L["MatchType"]" Class="mb-3">
+                <MudSelectItem Value="MatchType.Singles">@L["Singles"]</MudSelectItem>
+                <MudSelectItem Value="MatchType.Doubles">@L["Doubles"]</MudSelectItem>
+            </MudSelect>
+            <MudCheckBox @bind-Value="_model.RequireApprovalToJoin"
+                         Label="@L["RequireApproval"]" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LC["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Disabled="!_isValid" OnClick="SaveAsync">
+            @LC["Save"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public LeagueDto? League { get; set; }
+
+    private MudForm _form = null!;
+    private bool _isValid;
+    private LeagueDto _model = new();
+
+    protected override void OnParametersSet()
+    {
+        _model = League is not null
+            ? new LeagueDto
+            {
+                Id = League.Id,
+                Name = League.Name,
+                Mode = League.Mode,
+                MatchType = League.MatchType,
+                RequireApprovalToJoin = League.RequireApprovalToJoin
+            }
+            : new LeagueDto();
+    }
+
+    private async Task SaveAsync()
+    {
+        await _form.ValidateAsync();
+        if (!_isValid) return;
+
+        var response = League is null
+            ? await LeagueClient.CreateAsync(_model)
+            : await LeagueClient.UpdateAsync(_model.Id, _model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(L["SaveSuccess"], Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(L["SaveError"], Severity.Error);
+        }
+    }
+}

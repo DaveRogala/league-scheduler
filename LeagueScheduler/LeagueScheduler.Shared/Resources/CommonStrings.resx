@@ -34,4 +34,10 @@
   <data name="NavHome" xml:space="preserve"><value>Home</value></data>
   <data name="NavScheduler" xml:space="preserve"><value>Scheduler</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="NavLeagues" xml:space="preserve"><value>Leagues</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Confirm" xml:space="preserve"><value>Confirm</value></data>
 </root>

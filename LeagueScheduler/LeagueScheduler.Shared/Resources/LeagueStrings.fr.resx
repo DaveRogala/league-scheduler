@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>Ligues</value></data>
+  <data name="CreateLeague" xml:space="preserve"><value>Créer une ligue</value></data>
+  <data name="EditLeague" xml:space="preserve"><value>Modifier la ligue</value></data>
+  <data name="Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Mode" xml:space="preserve"><value>Mode</value></data>
+  <data name="MatchType" xml:space="preserve"><value>Type de match</value></data>
+  <data name="RequireApproval" xml:space="preserve"><value>Approbation requise pour rejoindre</value></data>
+  <data name="Recreational" xml:space="preserve"><value>Récréatif</value></data>
+  <data name="Competitive" xml:space="preserve"><value>Compétitif</value></data>
+  <data name="Singles" xml:space="preserve"><value>Simple</value></data>
+  <data name="Doubles" xml:space="preserve"><value>Double</value></data>
+  <data name="NoLeagues" xml:space="preserve"><value>Aucune ligue pour l'instant. Créez votre première ligue.</value></data>
+  <data name="ConfirmDeleteBody" xml:space="preserve"><value>Êtes-vous sûr de vouloir supprimer cette ligue ? Cette action est irréversible.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Le nom est requis.</value></data>
+  <data name="SaveSuccess" xml:space="preserve"><value>Ligue enregistrée.</value></data>
+  <data name="DeleteSuccess" xml:space="preserve"><value>Ligue supprimée.</value></data>
+  <data name="SaveError" xml:space="preserve"><value>Impossible d'enregistrer la ligue.</value></data>
+  <data name="DeleteError" xml:space="preserve"><value>Impossible de supprimer la ligue.</value></data>
+</root>
