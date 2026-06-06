@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using LeagueScheduler.Client.Services;
-using System.Net.Http;
+using LeagueScheduler.Client.Features.Scheduling;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddMudServices();
-// register HttpClient and SchedulerClient
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<SchedulerClient>();
 

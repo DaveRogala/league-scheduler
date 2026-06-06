@@ -1,11 +1,8 @@
-using System;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
-using LeagueScheduler.Shared.Models;
+using LeagueScheduler.Shared.Scheduling;
 using Microsoft.Extensions.Options;
 
-namespace LeagueScheduler.Services
+namespace LeagueScheduler.Features.Scheduling
 {
     public class JsonScheduleRepository : IScheduleRepository
     {
