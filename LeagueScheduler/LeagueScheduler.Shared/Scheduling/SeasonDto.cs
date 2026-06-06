@@ -3,18 +3,12 @@ using System.Collections.Generic;
 
 namespace LeagueScheduler.Shared.Scheduling
 {
-    public enum MatchType
-    {
-        Singles,
-        Doubles
-    }
-
-    public record LeagueDto
+    public record SeasonDto
     {
         public Guid Id { get; init; } = Guid.NewGuid();
+        public Guid LeagueId { get; init; }
         public string Name { get; init; } = string.Empty;
         public MatchType MatchType { get; init; } = MatchType.Doubles;
-        public int Courts { get; init; } = 1;
         public DateTime StartDate { get; init; }
         public DateTime EndDate { get; init; }
         public List<DayOfWeek> DaysOfWeek { get; init; } = new();
