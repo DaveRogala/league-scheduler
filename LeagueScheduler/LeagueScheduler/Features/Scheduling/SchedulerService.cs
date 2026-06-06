@@ -73,21 +73,13 @@ namespace LeagueScheduler.Features.Scheduling
 
                     for (int pick = 0; pick < playersPerMatch; pick++)
                     {
-                        // Prefer Regular/AsNeeded players; only consider OnCall players
-                        // if no other eligible candidates remain.
+                        // OnCall players are never scheduled — they exist only as a
+                        // contact list for manual substitutions outside the algorithm.
                         var candidates = players
                             .Where(p => p.Role != PlayerRole.OnCall
                                 && !p.UnavailableDates.Any(d => d.Date == date.Date)
                                 && !selected.Contains(p.Id))
                             .ToList();
-
-                        if (!candidates.Any())
-                        {
-                            candidates = players
-                                .Where(p => !p.UnavailableDates.Any(d => d.Date == date.Date)
-                                    && !selected.Contains(p.Id))
-                                .ToList();
-                        }
 
                         // Score each candidate by their pacing ratio.
                         // Math.Max(0.5, expectedByNow) floors the denominator so we don't
