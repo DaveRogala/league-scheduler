@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="LeagueScheduler.Client/LeagueScheduler.Client.csproj" />
+  <Project Path="LeagueScheduler.Shared/LeagueScheduler.Shared.csproj" />
+  <Project Path="LeagueScheduler/LeagueScheduler.csproj" />
+</Solution>

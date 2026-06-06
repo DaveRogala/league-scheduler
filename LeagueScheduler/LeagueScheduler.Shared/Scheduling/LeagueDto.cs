@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LeagueScheduler.Shared.Models
+namespace LeagueScheduler.Shared.Scheduling
 {
     public enum MatchType
     {
@@ -17,11 +17,8 @@ namespace LeagueScheduler.Shared.Models
         public int Courts { get; init; } = 1;
         public DateTime StartDate { get; init; }
         public DateTime EndDate { get; init; }
-        // Days of week the league plays (e.g., Saturday)
         public List<DayOfWeek> DaysOfWeek { get; init; } = new();
-        // Non-play dates such as holidays or club-closed dates
         public List<DateTime> NonPlayDates { get; init; } = new();
-        // Pre-planned events that must be honored
         public List<PrePlannedEventDto> PrePlannedEvents { get; init; } = new();
     }
 }

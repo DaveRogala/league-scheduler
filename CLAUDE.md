@@ -4,17 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-All commands run from the `LeagueScheduler/` solution root (the directory containing the three `.csproj` files).
+All commands run from `LeagueScheduler/` (the directory containing `LeagueScheduler.slnx`).
 
 ```bash
 # Build
-dotnet build
+dotnet build LeagueScheduler.slnx
 
 # Run the server (serves both API and Blazor WASM)
 dotnet run --project LeagueScheduler/LeagueScheduler.csproj
 
 # Run tests (none yet — add xUnit projects under LeagueScheduler/)
-dotnet test
+dotnet test LeagueScheduler.slnx
 ```
 
 The server starts at `http://localhost:5227` (HTTP) or `https://localhost:7267` (HTTPS). The Blazor WASM client is served as static assets by the server project; there is no separate client dev server.
@@ -23,13 +23,15 @@ The server starts at `http://localhost:5227` (HTTP) or `https://localhost:7267` 
 
 This is a Blazor Web App with WebAssembly interactivity on .NET 9, structured as three projects:
 
-- **`LeagueScheduler`** — ASP.NET Core server. Hosts Blazor components server-side, serves the WASM bundle, and exposes a minimal API (`POST /api/scheduler/compute`).
-- **`LeagueScheduler.Client`** — Blazor WebAssembly project. Runs in the browser. Contains the interactive UI pages and a typed `SchedulerClient` HTTP wrapper.
-- **`LeagueScheduler.Shared`** — Class library with all DTOs shared between server and client. No dependencies on ASP.NET or WASM — safe to use on both sides.
+- **`LeagueScheduler`** — ASP.NET Core server. Hosts Blazor components server-side, serves the WASM bundle, and exposes minimal API endpoints.
+- **`LeagueScheduler.Client`** — Blazor WebAssembly project. Runs in the browser. Contains interactive UI pages and typed HTTP client wrappers.
+- **`LeagueScheduler.Shared`** — Class library with all DTOs shared between server and client. No dependencies on ASP.NET or WASM.
+
+Code is organized by **vertical slice** — each feature lives in its own `Features/<FeatureName>/` folder within each project. New features always get their own folder in all three projects as needed.
 
 ### Scheduling domain
 
-The core scheduling logic lives entirely in `LeagueScheduler/Services/SchedulerService.cs`. The algorithm:
+The core scheduling logic lives entirely in `LeagueScheduler/Features/Scheduling/SchedulerService.cs`. The algorithm:
 
 1. Expands `LeagueDto.StartDate`..`EndDate` by `DaysOfWeek`, minus `NonPlayDates`, to produce eligible play dates.
 2. Computes a target slot count per player from `PlayerDto.PreferencePercent` × total available slots.
@@ -39,7 +41,7 @@ The core scheduling logic lives entirely in `LeagueScheduler/Services/SchedulerS
 
 `ScheduleOptions` (bound from the `Scheduling` config section) controls `DefaultFairnessTolerance` and `DataFolder`.
 
-### Key DTOs (all records, in `LeagueScheduler.Shared/Models/`)
+### Key DTOs (all records, in `LeagueScheduler.Shared/Scheduling/`)
 
 | Type | Purpose |
 |---|---|
@@ -52,6 +54,6 @@ The core scheduling logic lives entirely in `LeagueScheduler/Services/SchedulerS
 
 ### UI
 
-MudBlazor 8.x is used throughout. The only substantive page is `LeagueScheduler.Client/Pages/Scheduler.razor` — a minimal MVP that accepts raw `ScheduleRequestDto` JSON, calls the API via `SchedulerClient`, and displays results in a `MudTable`.
+MudBlazor 8.x is used throughout. The only substantive page is `LeagueScheduler.Client/Features/Scheduling/Scheduler.razor` — a minimal MVP that accepts raw `ScheduleRequestDto` JSON, calls the API via `SchedulerClient`, and displays results in a `MudTable`.
 
-The server-side `MudBlazor.Services` registration and the client-side registration are done separately in their respective `Program.cs` files.
+MudBlazor services are registered in both the server and client `Program.cs` files independently (required by the Blazor WASM hosting model).

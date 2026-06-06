@@ -1,17 +1,13 @@
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using LeagueScheduler.Shared.Models;
+using LeagueScheduler.Shared.Scheduling;
 
-namespace LeagueScheduler.Client.Services
+namespace LeagueScheduler.Client.Features.Scheduling
 {
     public class SchedulerClient
     {
         private readonly HttpClient _http;
 
-        public SchedulerClient(HttpClient http)
-        {
-            _http = http;
-        }
+        public SchedulerClient(HttpClient http) => _http = http;
 
         public async Task<ScheduleResultDto?> ComputeAsync(ScheduleRequestDto request)
         {

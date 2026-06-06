@@ -1,7 +1,6 @@
-using System.Threading.Tasks;
-using LeagueScheduler.Shared.Models;
+using LeagueScheduler.Shared.Scheduling;
 
-namespace LeagueScheduler.Services
+namespace LeagueScheduler.Features.Scheduling
 {
     public interface ISchedulerService
     {
