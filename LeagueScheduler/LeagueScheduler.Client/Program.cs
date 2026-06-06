@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
+using LeagueScheduler.Client.Features.Auth;
 using LeagueScheduler.Client.Features.Scheduling;
 using System.Globalization;
 using Microsoft.JSInterop;
@@ -8,8 +10,28 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddLocalization();
 builder.Services.AddMudServices();
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AppAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<AppAuthStateProvider>());
+builder.Services.AddTransient<BearerTokenHandler>();
+
+builder.Services.AddScoped(sp =>
+{
+    var auth = sp.GetRequiredService<AppAuthStateProvider>();
+    var handler = new BearerTokenHandler(auth)
+    {
+        InnerHandler = new HttpClientHandler()
+    };
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+    };
+});
+
 builder.Services.AddScoped<SchedulerClient>();
+builder.Services.AddScoped<AuthClient>();
 
 var host = builder.Build();
 
