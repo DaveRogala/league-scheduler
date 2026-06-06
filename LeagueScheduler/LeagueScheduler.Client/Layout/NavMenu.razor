@@ -1,7 +1,10 @@
-﻿
+@inject IStringLocalizer<CommonStrings> L
+
 <MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="scheduler" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DateRange">Scheduler</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@L["NavHome"]</MudNavLink>
+    <MudNavLink Href="scheduler" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DateRange">@L["NavScheduler"]</MudNavLink>
 </MudNavMenu>
 
-
+<div class="px-3 pt-2">
+    <CultureSelector />
+</div>

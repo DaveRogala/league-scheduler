@@ -1,26 +1,27 @@
 @page "/scheduler"
 @using LeagueScheduler.Shared.Scheduling
 @inject SchedulerClient SchedulerClient
+@inject IStringLocalizer<SchedulingStrings> L
 
-<PageTitle>Scheduler</PageTitle>
+<PageTitle>@L["PageTitle"]</PageTitle>
 
-<MudText Typo="Typo.h4">Scheduler</MudText>
+<MudText Typo="Typo.h4">@L["PageTitle"]</MudText>
 
 <MudPaper Class="pa-4">
-    <MudText>Simple scheduler UI (MVP): paste JSON for `ScheduleRequestDto` and run.</MudText>
+    <MudText>@L["Instruction"]</MudText>
     <MudTextField @bind-Value="RequestJson" Lines="10" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RunSchedule">Compute Schedule</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RunSchedule">@L["ComputeButton"]</MudButton>
 </MudPaper>
 
 @if (Result != null)
 {
     <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">Schedule Results</MudText>
+        <MudText Typo="Typo.h6">@L["ResultsTitle"]</MudText>
         <MudTable Items="Result.Matches">
             <HeaderContent>
-                <MudTh>Date</MudTh>
-                <MudTh>Court</MudTh>
-                <MudTh>Players</MudTh>
+                <MudTh>@L["ColDate"]</MudTh>
+                <MudTh>@L["ColCourt"]</MudTh>
+                <MudTh>@L["ColPlayers"]</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd>@context.Date.ToShortDateString()</MudTd>

@@ -1,8 +1,9 @@
 @page "/"
+@inject IStringLocalizer<CommonStrings> L
 
-<PageTitle>League Scheduler</PageTitle>
+<PageTitle>@L["AppName"]</PageTitle>
 
-<MudText Typo="Typo.h4">League Scheduler</MudText>
+<MudText Typo="Typo.h4">@L["AppName"]</MudText>
 <MudText Typo="Typo.body1" Class="mt-2">
     Manage your informal tennis leagues — scheduling, players, and results in one place.
 </MudText>
