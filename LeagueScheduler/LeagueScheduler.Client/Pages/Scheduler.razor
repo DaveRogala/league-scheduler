@@ -1,0 +1,51 @@
+@page "/scheduler"
+@using LeagueScheduler.Shared.Models
+@inject LeagueScheduler.Client.Services.SchedulerClient SchedulerClient
+
+<PageTitle>Scheduler</PageTitle>
+
+<MudText Typo="Typo.h4">Scheduler</MudText>
+
+<MudPaper Class="pa-4">
+    <MudText>Simple scheduler UI (MVP): paste JSON for `ScheduleRequestDto` and run.</MudText>
+    <MudTextField @bind-Value="RequestJson" Lines="10" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="RunSchedule">Compute Schedule</MudButton>
+</MudPaper>
+
+@if (Result != null)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">Schedule Results</MudText>
+        <MudTable Items="Result.Matches">
+            <HeaderContent>
+                <MudTh>Date</MudTh>
+                <MudTh>Court</MudTh>
+                <MudTh>Players</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Date.ToShortDateString()</MudTd>
+                <MudTd>@context.Court</MudTd>
+                <MudTd>@string.Join(", ", context.PlayerIds)</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    string RequestJson { get; set; } = string.Empty;
+    ScheduleResultDto? Result { get; set; }
+
+    async Task RunSchedule()
+    {
+        try
+        {
+            var req = System.Text.Json.JsonSerializer.Deserialize<ScheduleRequestDto>(RequestJson);
+            if (req == null) return;
+            Result = await SchedulerClient.ComputeAsync(req);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
