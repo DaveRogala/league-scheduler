@@ -16,6 +16,7 @@ namespace LeagueScheduler.Features.Scheduling
             var entity = new ScheduleResult
             {
                 Id = dto.Id,
+                SeasonId = dto.SeasonId,
                 FairnessToleranceUsed = dto.FairnessToleranceUsed,
                 AssignedCounts = dto.AssignedCounts,
                 TargetCounts = dto.TargetCounts,
@@ -24,7 +25,8 @@ namespace LeagueScheduler.Features.Scheduling
                 {
                     Id = m.Id,
                     Date = m.Date,
-                    CourtNumber = m.Court,
+                    CourtId = m.CourtId,
+                    CourtNumber = 0,
                     PlayerIds = [.. m.PlayerIds]
                 }).ToList()
             };
@@ -37,6 +39,7 @@ namespace LeagueScheduler.Features.Scheduling
         {
             var entity = await _db.ScheduleResults
                 .Include(r => r.Matches)
+                    .ThenInclude(m => m.Court)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (entity is null) return null;
@@ -44,6 +47,7 @@ namespace LeagueScheduler.Features.Scheduling
             return new ScheduleResultDto
             {
                 Id = entity.Id,
+                SeasonId = entity.SeasonId,
                 FairnessToleranceUsed = entity.FairnessToleranceUsed,
                 AssignedCounts = entity.AssignedCounts,
                 TargetCounts = entity.TargetCounts,
@@ -52,7 +56,8 @@ namespace LeagueScheduler.Features.Scheduling
                 {
                     Id = m.Id,
                     Date = m.Date,
-                    Court = m.CourtNumber,
+                    CourtId = m.CourtId ?? Guid.Empty,
+                    CourtName = m.Court?.Name ?? string.Empty,
                     PlayerIds = [.. m.PlayerIds]
                 }).ToList()
             };
