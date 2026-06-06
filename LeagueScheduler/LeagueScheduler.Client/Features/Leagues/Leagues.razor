@@ -1,0 +1,96 @@
+@page "/leagues"
+@attribute [Authorize]
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<LeagueStrings> L
+@inject LeagueClient LeagueClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@L["PageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="CreateAsync" Class="mb-4">
+    @L["CreateLeague"]
+</MudButton>
+
+<MudTable Items="_leagues" Hover="true" Loading="_loading" Dense="true">
+    <HeaderContent>
+        <MudTh>@L["Name"]</MudTh>
+        <MudTh>@L["Mode"]</MudTh>
+        <MudTh>@L["MatchType"]</MudTh>
+        <MudTh>@L["RequireApproval"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@L["Name"]">@context.Name</MudTd>
+        <MudTd DataLabel="@L["Mode"]">@L[context.Mode.ToString()]</MudTd>
+        <MudTd DataLabel="@L["MatchType"]">@L[context.MatchType.ToString()]</MudTd>
+        <MudTd DataLabel="@L["RequireApproval"]">
+            @if (context.RequireApprovalToJoin)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Outlined.Circle" Color="Color.Default" Size="Size.Small" />
+            }
+        </MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                           title="@LC["Edit"]" OnClick="() => EditAsync(context)" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                           Color="Color.Error" title="@LC["Delete"]"
+                           OnClick="() => DeleteAsync(context)" />
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2" Class="pa-4">@L["NoLeagues"]</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    private List<LeagueDto> _leagues = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _leagues = await LeagueClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task CreateAsync()
+    {
+        var dialog = await DialogService.ShowAsync<LeagueDialog>(L["CreateLeague"]);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private async Task EditAsync(LeagueDto league)
+    {
+        var parameters = new DialogParameters<LeagueDialog> { { x => x.League, league } };
+        var dialog = await DialogService.ShowAsync<LeagueDialog>(L["EditLeague"], parameters);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private async Task DeleteAsync(LeagueDto league)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LC["Confirm"],
+            L["ConfirmDeleteBody"],
+            yesText: LC["Delete"],
+            cancelText: LC["Cancel"]);
+
+        if (confirmed is not true) return;
+
+        var response = await LeagueClient.DeleteAsync(league.Id);
+        Snackbar.Add(
+            response.IsSuccessStatusCode ? L["DeleteSuccess"] : L["DeleteError"],
+            response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (response.IsSuccessStatusCode) await RefreshAsync();
+    }
+}

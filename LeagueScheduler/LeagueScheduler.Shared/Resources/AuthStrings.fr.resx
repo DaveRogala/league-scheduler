@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="LoginTitle" xml:space="preserve"><value>Se connecter</value></data>
+  <data name="RegisterTitle" xml:space="preserve"><value>Créer un compte</value></data>
+  <data name="Email" xml:space="preserve"><value>Courriel</value></data>
+  <data name="Password" xml:space="preserve"><value>Mot de passe</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>Confirmer le mot de passe</value></data>
+  <data name="DisplayName" xml:space="preserve"><value>Nom d'affichage</value></data>
+  <data name="SignInButton" xml:space="preserve"><value>Se connecter</value></data>
+  <data name="RegisterButton" xml:space="preserve"><value>Créer un compte</value></data>
+  <data name="NavLogin" xml:space="preserve"><value>Se connecter</value></data>
+  <data name="NavLogout" xml:space="preserve"><value>Se déconnecter</value></data>
+  <data name="RegisterPrompt" xml:space="preserve"><value>Pas de compte ? Créez-en un</value></data>
+  <data name="LoginPrompt" xml:space="preserve"><value>Vous avez un compte ? Se connecter</value></data>
+</root>

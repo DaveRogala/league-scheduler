@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>Terrains</value></data>
+  <data name="CreateCourt" xml:space="preserve"><value>Créer un terrain</value></data>
+  <data name="EditCourt" xml:space="preserve"><value>Modifier le terrain</value></data>
+  <data name="Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Type" xml:space="preserve"><value>Type</value></data>
+  <data name="NumberOfCourts" xml:space="preserve"><value>Nombre de terrains</value></data>
+  <data name="Lighted" xml:space="preserve"><value>Éclairé</value></data>
+  <data name="HoursOfOperation" xml:space="preserve"><value>Heures d'ouverture</value></data>
+  <data name="AccessNotes" xml:space="preserve"><value>Notes d'accès</value></data>
+  <data name="Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Condition" xml:space="preserve"><value>État</value></data>
+  <data name="Outdoor" xml:space="preserve"><value>Extérieur</value></data>
+  <data name="Indoor" xml:space="preserve"><value>Intérieur</value></data>
+  <data name="Both" xml:space="preserve"><value>Mixte</value></data>
+  <data name="TabDetails" xml:space="preserve"><value>Détails</value></data>
+  <data name="TabLocation" xml:space="preserve"><value>Emplacement</value></data>
+  <data name="NoCourts" xml:space="preserve"><value>Aucun terrain pour l'instant. Créez votre premier terrain.</value></data>
+  <data name="ConfirmDeleteBody" xml:space="preserve"><value>Êtes-vous sûr de vouloir supprimer ce terrain ? Cette action est irréversible.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Le nom est requis.</value></data>
+  <data name="SaveSuccess" xml:space="preserve"><value>Terrain enregistré.</value></data>
+  <data name="DeleteSuccess" xml:space="preserve"><value>Terrain supprimé.</value></data>
+  <data name="SaveError" xml:space="preserve"><value>Impossible d'enregistrer le terrain.</value></data>
+  <data name="DeleteError" xml:space="preserve"><value>Impossible de supprimer le terrain.</value></data>
+</root>

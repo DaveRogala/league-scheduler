@@ -1,0 +1,79 @@
+@inject IStringLocalizer<AddressStrings> L
+
+@if (Value is not null)
+{
+    <MudText Typo="Typo.subtitle1" Class="mb-3">@L["SectionTitle"]</MudText>
+
+    @if (Value.VisibleFields.HasFlag(AddressField.Line1))
+    {
+        <MudTextField @bind-Value="Value.Line1" Label="@L["Line1"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.Line2))
+    {
+        <MudTextField @bind-Value="Value.Line2" Label="@L["Line2"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.Line3))
+    {
+        <MudTextField @bind-Value="Value.Line3" Label="@L["Line3"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.Locality))
+    {
+        <MudTextField @bind-Value="Value.Locality" Label="@L["Locality"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.AdminArea))
+    {
+        <MudTextField @bind-Value="Value.AdminArea" Label="@L["AdminArea"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.SubAdminArea))
+    {
+        <MudTextField @bind-Value="Value.SubAdminArea" Label="@L["SubAdminArea"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.PostalCode))
+    {
+        <MudTextField @bind-Value="Value.PostalCode" Label="@L["PostalCode"]" Class="mb-3" />
+    }
+    @if (Value.VisibleFields.HasFlag(AddressField.Country))
+    {
+        <MudTextField @bind-Value="Value.CountryCode" Label="@L["CountryCode"]"
+                      MaxLength="2" HelperText="ISO 3166-1 alpha-2" Class="mb-3" />
+    }
+
+    <MudExpansionPanels Dense="true" Class="mt-2">
+        <MudExpansionPanel Text="@L["ConfigureFields"]">
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Line1)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.Line1, v))"
+                         Label="@L["Line1"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Line2)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.Line2, v))"
+                         Label="@L["Line2"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Line3)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.Line3, v))"
+                         Label="@L["Line3"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Locality)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.Locality, v))"
+                         Label="@L["Locality"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.AdminArea)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.AdminArea, v))"
+                         Label="@L["AdminArea"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.SubAdminArea)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.SubAdminArea, v))"
+                         Label="@L["SubAdminArea"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.PostalCode)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.PostalCode, v))"
+                         Label="@L["PostalCode"]" Dense="true" />
+            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Country)"
+                         ValueChanged="@((bool v) => ToggleField(AddressField.Country, v))"
+                         Label="@L["CountryCode"]" Dense="true" />
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+}
+
+@code {
+    [Parameter] public AddressDto Value { get; set; } = new();
+
+    private void ToggleField(AddressField field, bool show)
+    {
+        if (show) Value.VisibleFields |= field;
+        else Value.VisibleFields &= ~field;
+    }
+}

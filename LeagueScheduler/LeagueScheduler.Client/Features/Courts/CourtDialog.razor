@@ -1,0 +1,134 @@
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<CourtStrings> L
+@inject CourtClient CourtClient
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="_isValid">
+            <MudTabs>
+                <MudTabPanel Text="@L["TabDetails"]">
+                    <div class="pt-3">
+                        <MudTextField @bind-Value="_model.Name"
+                                      Label="@L["Name"]"
+                                      Required="true"
+                                      RequiredError="@L["NameRequired"]"
+                                      Immediate="true"
+                                      Class="mb-3" />
+                        <MudSelect @bind-Value="_model.Type" Label="@L["Type"]" Class="mb-3">
+                            <MudSelectItem Value="CourtType.Outdoor">@L["Outdoor"]</MudSelectItem>
+                            <MudSelectItem Value="CourtType.Indoor">@L["Indoor"]</MudSelectItem>
+                            <MudSelectItem Value="CourtType.Both">@L["Both"]</MudSelectItem>
+                        </MudSelect>
+                        <MudNumericField @bind-Value="_model.NumberOfCourts"
+                                         Label="@L["NumberOfCourts"]"
+                                         Min="1" Class="mb-3" />
+                        <MudCheckBox @bind-Value="_model.Lighted"
+                                     Label="@L["Lighted"]" Class="mb-3" />
+                        <MudTextField @bind-Value="_model.HoursOfOperation"
+                                      Label="@L["HoursOfOperation"]" Class="mb-3" />
+                        <MudTextField @bind-Value="_model.AccessNotes"
+                                      Label="@L["AccessNotes"]" Lines="2" Class="mb-3" />
+                        <MudTextField @bind-Value="_model.Description"
+                                      Label="@L["Description"]" Lines="2" Class="mb-3" />
+                        <MudTextField @bind-Value="_model.Condition"
+                                      Label="@L["Condition"]" Class="mb-3" />
+                    </div>
+                </MudTabPanel>
+                <MudTabPanel Text="@L["TabLocation"]">
+                    <div class="pt-3">
+                        <AddressForm Value="_address" />
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LC["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Disabled="!_isValid" OnClick="SaveAsync">
+            @LC["Save"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public CourtDto? Court { get; set; }
+
+    private MudForm _form = null!;
+    private bool _isValid;
+    private CourtDto _model = new();
+    private AddressDto _address = new();
+
+    protected override void OnParametersSet()
+    {
+        if (Court is not null)
+        {
+            _model = new CourtDto
+            {
+                Id = Court.Id,
+                Name = Court.Name,
+                Type = Court.Type,
+                NumberOfCourts = Court.NumberOfCourts,
+                Lighted = Court.Lighted,
+                HoursOfOperation = Court.HoursOfOperation,
+                AccessNotes = Court.AccessNotes,
+                Description = Court.Description,
+                Condition = Court.Condition
+            };
+            _address = Court.Address is not null
+                ? new AddressDto
+                {
+                    Id = Court.Address.Id,
+                    Line1 = Court.Address.Line1,
+                    Line2 = Court.Address.Line2,
+                    Line3 = Court.Address.Line3,
+                    Locality = Court.Address.Locality,
+                    AdminArea = Court.Address.AdminArea,
+                    SubAdminArea = Court.Address.SubAdminArea,
+                    PostalCode = Court.Address.PostalCode,
+                    CountryCode = Court.Address.CountryCode,
+                    VisibleFields = Court.Address.VisibleFields
+                }
+                : new AddressDto();
+        }
+        else
+        {
+            _model = new CourtDto();
+            _address = new AddressDto();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        await _form.ValidateAsync();
+        if (!_isValid) return;
+
+        _model.Address = HasAddressData(_address) ? _address : null;
+
+        var response = Court is null
+            ? await CourtClient.CreateAsync(_model)
+            : await CourtClient.UpdateAsync(_model.Id, _model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(L["SaveSuccess"], Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(L["SaveError"], Severity.Error);
+        }
+    }
+
+    private static bool HasAddressData(AddressDto a) =>
+        !string.IsNullOrWhiteSpace(a.Line1) ||
+        !string.IsNullOrWhiteSpace(a.Line2) ||
+        !string.IsNullOrWhiteSpace(a.Line3) ||
+        !string.IsNullOrWhiteSpace(a.Locality) ||
+        !string.IsNullOrWhiteSpace(a.AdminArea) ||
+        !string.IsNullOrWhiteSpace(a.SubAdminArea) ||
+        !string.IsNullOrWhiteSpace(a.PostalCode) ||
+        !string.IsNullOrWhiteSpace(a.CountryCode);
+}
