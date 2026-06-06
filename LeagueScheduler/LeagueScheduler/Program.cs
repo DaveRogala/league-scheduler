@@ -2,6 +2,8 @@ using MudBlazor.Services;
 using LeagueScheduler.Client.Features.Scheduling;
 using LeagueScheduler.Components;
 using LeagueScheduler.Features.Scheduling;
+using LeagueScheduler.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +11,18 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddDbContext<AppDbContext>(opts =>
+    opts.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.Configure<ScheduleOptions>(builder.Configuration.GetSection("Scheduling"));
-builder.Services.AddSingleton<IScheduleRepository, JsonScheduleRepository>();
-builder.Services.AddSingleton<ISchedulerService, SchedulerService>();
+builder.Services.AddScoped<IScheduleRepository, EfScheduleRepository>();
+builder.Services.AddScoped<ISchedulerService, SchedulerService>();
 
 var app = builder.Build();
+
+// Apply any pending migrations on startup
+using (var scope = app.Services.CreateScope())
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
