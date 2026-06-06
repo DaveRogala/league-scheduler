@@ -2,6 +2,7 @@ using MudBlazor.Services;
 using LeagueScheduler.Client.Features.Scheduling;
 using LeagueScheduler.Components;
 using LeagueScheduler.Features.Auth;
+using LeagueScheduler.Features.Leagues;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Scheduling;
 using LeagueScheduler.Infrastructure.Data;
@@ -96,5 +97,6 @@ app.MapRazorComponents<App>()
 
 app.MapSchedulingEndpoints();
 app.MapAuthEndpoints();
+app.MapLeagueEndpoints();
 
 app.Run();
