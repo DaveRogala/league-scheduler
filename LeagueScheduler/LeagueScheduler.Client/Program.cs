@@ -39,9 +39,16 @@ var js = host.Services.GetRequiredService<IJSRuntime>();
 var cultureName = await js.InvokeAsync<string?>("blazorCulture.get");
 if (!string.IsNullOrWhiteSpace(cultureName))
 {
-    var culture = new CultureInfo(cultureName);
-    CultureInfo.DefaultThreadCurrentCulture = culture;
-    CultureInfo.DefaultThreadCurrentUICulture = culture;
+    try
+    {
+        var culture = new CultureInfo(cultureName);
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+    }
+    catch (CultureNotFoundException)
+    {
+        // Stored culture is invalid or not available — fall back to default.
+    }
 }
 
 await host.RunAsync();
