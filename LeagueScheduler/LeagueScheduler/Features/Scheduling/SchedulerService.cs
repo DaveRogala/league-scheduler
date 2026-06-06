@@ -20,83 +20,139 @@ namespace LeagueScheduler.Features.Scheduling
             var league = request.League;
             var players = request.Players ?? new List<PlayerDto>();
 
+            // --- Phase 1: Build eligible play dates ---
+            // Walk the full date range, keeping only days that match the league's
+            // scheduled days-of-week and aren't blocked as non-play dates (holidays, etc.).
             var eligibleDates = new List<DateTime>();
             DateTime cur = league.StartDate.Date;
             while (cur <= league.EndDate.Date)
             {
-                if (league.DaysOfWeek.Contains(cur.DayOfWeek) && !league.NonPlayDates.Any(d => d.Date == cur.Date))
+                if (league.DaysOfWeek.Contains(cur.DayOfWeek) &&
+                    !league.NonPlayDates.Any(d => d.Date == cur.Date))
                     eligibleDates.Add(cur);
                 cur = cur.AddDays(1);
             }
 
-            int playersPerMatch = league.MatchType == MatchType.Singles ? 2 : 4;
-            var slotsPerDate = eligibleDates.ToDictionary(d => d, d => league.Courts * playersPerMatch);
-            int totalSlots = slotsPerDate.Values.Sum();
+            int totalDates = eligibleDates.Count;
 
-            var playerTargets = players.ToDictionary(p => p.Id, p => (int)Math.Round(p.PreferencePercent * totalSlots));
+            // --- Phase 2: Compute targets ---
+            // Each play date fills (courts × playersPerMatch) slots.
+            // A player's target is how many of those total slots they should occupy,
+            // derived from their stated preference percentage.
+            int playersPerMatch = league.MatchType == MatchType.Singles ? 2 : 4;
+            int totalSlots = totalDates * league.Courts * playersPerMatch;
+
+            var playerTargets = players.ToDictionary(
+                p => p.Id,
+                p => (int)Math.Round(p.PreferencePercent * totalSlots));
             var assignedCounts = players.ToDictionary(p => p.Id, p => 0);
 
             var result = new ScheduleResultDto();
 
-            foreach (var date in eligibleDates)
+            // --- Phase 3: Fill matches with season-paced priority ---
+            // For each play date we compute a "season progress" fraction (0→1 over the season).
+            // Each candidate player is scored by a pacing ratio:
+            //
+            //   ratio = assignedSoFar / expectedByNow
+            //   expectedByNow = target × seasonProgress
+            //
+            // A player below their expected pace (low ratio) gets priority over one who is
+            // already ahead of pace (high ratio). This distributes assignments proportionally
+            // throughout the season rather than front-loading high-percentage players early.
+            for (int dateIndex = 0; dateIndex < totalDates; dateIndex++)
             {
-                int requiredSlots = slotsPerDate[date];
-                int matches = requiredSlots / playersPerMatch;
-                for (int m = 0; m < matches; m++)
+                var date = eligibleDates[dateIndex];
+
+                // seasonProgress uses (dateIndex + 1) so the very first date isn't 0,
+                // which would make expectedByNow = 0 for everyone and lose discrimination.
+                double seasonProgress = (double)(dateIndex + 1) / totalDates;
+
+                for (int court = 0; court < league.Courts; court++)
                 {
-                    var selected = new List<Guid>();
+                    List<Guid> selected = [];
+
                     for (int pick = 0; pick < playersPerMatch; pick++)
                     {
-                        var candidates = players.Where(p => p.Role != PlayerRole.OnCall
-                            && !p.UnavailableDates.Any(d => d.Date == date.Date)
-                            && !selected.Contains(p.Id))
+                        // Prefer Regular/AsNeeded players; only consider OnCall players
+                        // if no other eligible candidates remain.
+                        var candidates = players
+                            .Where(p => p.Role != PlayerRole.OnCall
+                                && !p.UnavailableDates.Any(d => d.Date == date.Date)
+                                && !selected.Contains(p.Id))
                             .ToList();
 
                         if (!candidates.Any())
                         {
-                            candidates = players.Where(p => !p.UnavailableDates.Any(d => d.Date == date.Date)
-                                && !selected.Contains(p.Id)).ToList();
+                            candidates = players
+                                .Where(p => !p.UnavailableDates.Any(d => d.Date == date.Date)
+                                    && !selected.Contains(p.Id))
+                                .ToList();
                         }
 
-                        var ordered = candidates.OrderBy(c =>
-                        {
-                            int target = playerTargets.ContainsKey(c.Id) ? Math.Max(1, playerTargets[c.Id]) : 1;
-                            double ratio = assignedCounts[c.Id] / (double)target;
-                            if (c.Nudge == NudgePreference.Above) ratio -= 0.01;
-                            if (c.Nudge == NudgePreference.Below) ratio += 0.01;
-                            return ratio;
-                        }).ThenBy(c => c.PreferencePercent).ToList();
+                        // Score each candidate by their pacing ratio.
+                        // Math.Max(0.5, expectedByNow) floors the denominator so we don't
+                        // divide by near-zero at the very start of the season, and avoids
+                        // wildly inflating the ratio for players with tiny targets.
+                        var ordered = candidates
+                            .OrderBy(c =>
+                            {
+                                int target = Math.Max(1, playerTargets.GetValueOrDefault(c.Id));
+                                double expectedByNow = target * seasonProgress;
+                                double ratio = assignedCounts[c.Id] / Math.Max(0.5, expectedByNow);
 
-                        var pickPlayer = ordered.FirstOrDefault();
-                        if (pickPlayer == null) break;
+                                // Nudge shifts the ratio slightly to honor the player's stated
+                                // preference without overriding the pacing logic.
+                                if (c.Nudge == NudgePreference.Above) ratio -= 0.05;
+                                if (c.Nudge == NudgePreference.Below) ratio += 0.05;
 
-                        selected.Add(pickPlayer.Id);
-                        assignedCounts[pickPlayer.Id]++;
+                                return ratio;
+                            })
+                            .ThenBy(c => c.PreferencePercent)
+                            .ToList();
+
+                        var pick_player = ordered.FirstOrDefault();
+                        if (pick_player == null) break;
+
+                        selected.Add(pick_player.Id);
+                        assignedCounts[pick_player.Id]++;
                     }
 
                     if (selected.Count == playersPerMatch)
                     {
-                        result.Matches.Add(new MatchDto { Date = date, Court = m % league.Courts + 1, PlayerIds = selected });
+                        result.Matches.Add(new MatchDto
+                        {
+                            Date = date,
+                            Court = court + 1,
+                            PlayerIds = selected
+                        });
                     }
                     else
                     {
-                        result.Conflicts.Add($"Unfilled match on {date:d} court {m + 1}: only assigned {selected.Count} players.");
+                        result.Conflicts.Add(
+                            $"Unfilled match on {date:d} court {court + 1}: only assigned {selected.Count}/{playersPerMatch} players.");
                     }
                 }
             }
 
+            // --- Phase 4: Populate result summary ---
             foreach (var kv in assignedCounts) result.AssignedCounts[kv.Key] = kv.Value;
             foreach (var kv in playerTargets) result.TargetCounts[kv.Key] = kv.Value;
 
+            // --- Phase 5: Fairness validation ---
+            // Flag any player whose final assigned count deviates from their target
+            // by more than the configured tolerance (slots, not percentage).
             int tolerance = request.FairnessTolerance ?? _options.DefaultFairnessTolerance;
             result.FairnessToleranceUsed = tolerance;
 
             foreach (var p in players)
             {
-                var assigned = assignedCounts.GetValueOrDefault(p.Id);
-                var target = playerTargets.GetValueOrDefault(p.Id);
+                int assigned = assignedCounts.GetValueOrDefault(p.Id);
+                int target = playerTargets.GetValueOrDefault(p.Id);
                 if (Math.Abs(assigned - target) > tolerance)
-                    result.Conflicts.Add($"Player {p.Name} assigned {assigned} vs target {target} exceeds tolerance {tolerance}.");
+                {
+                    result.Conflicts.Add(
+                        $"Player {p.Name} assigned {assigned} vs target {target} exceeds tolerance {tolerance}.");
+                }
             }
 
             await _repo.SaveAsync(result);
