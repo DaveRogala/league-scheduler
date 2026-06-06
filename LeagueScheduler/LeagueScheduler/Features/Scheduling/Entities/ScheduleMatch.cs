@@ -1,3 +1,5 @@
+using LeagueScheduler.Features.Courts.Entities;
+
 namespace LeagueScheduler.Features.Scheduling.Entities
 {
     public class ScheduleMatch
@@ -6,7 +8,12 @@ namespace LeagueScheduler.Features.Scheduling.Entities
         public Guid ScheduleResultId { get; set; }
         public ScheduleResult ScheduleResult { get; set; } = null!;
         public DateTime Date { get; set; }
-        public int Court { get; set; }
+        // Court number within the season (1-based); retained until scheduling-v2-dtos
+        // maps CourtId from the SeasonCourts ordered list
+        public int CourtNumber { get; set; }
+        // Nullable until scheduling DTOs are updated to pass Court entities
+        public Guid? CourtId { get; set; }
+        public Court? Court { get; set; }
         public List<Guid> PlayerIds { get; set; } = [];
     }
 }
