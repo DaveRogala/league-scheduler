@@ -11,19 +11,25 @@
 
 <MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled"
-           StartIcon="@Icons.Material.Filled.Add"
-           OnClick="CreateAsync" Class="mb-4">
-    @L["CreateCourt"]
-</MudButton>
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="CreateAsync">
+        @L["CreateCourt"]
+    </MudButton>
+    <MudSpacer />
+    <MudTextField @bind-Value="_searchString" Placeholder="@LC["Search"]"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true" Clearable="true" Style="max-width:300px" />
+</MudStack>
 
-<MudTable Items="_courts" Hover="true" Loading="_loading" Dense="true">
+<MudTable Items="@FilteredCourts" Hover="true" Loading="_loading" Dense="true">
     <HeaderContent>
-        <MudTh>@L["Name"]</MudTh>
-        <MudTh>@L["Type"]</MudTh>
-        <MudTh>@L["NumberOfCourts"]</MudTh>
-        <MudTh>@L["Lighted"]</MudTh>
-        <MudTh>@LA["SectionTitle"]</MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Name))">@L["Name"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Type))">@L["Type"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.NumberOfCourts))">@L["NumberOfCourts"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Lighted))">@L["Lighted"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => AddressSummary(x.Address)))">@LA["SectionTitle"]</MudTableSortLabel></MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -53,6 +59,19 @@
 @code {
     private List<CourtDto> _courts = [];
     private bool _loading = true;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<CourtDto> FilteredCourts => string.IsNullOrWhiteSpace(_searchString)
+        ? _courts
+        : _courts.Where(c =>
+        {
+            var s = _searchString.Trim();
+            return c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
+                || c.Type.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+                || AddressSummary(c.Address).Contains(s, StringComparison.OrdinalIgnoreCase)
+                || (c.HoursOfOperation?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Description?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+        });
 
     protected override async Task OnInitializedAsync() => await RefreshAsync();
 

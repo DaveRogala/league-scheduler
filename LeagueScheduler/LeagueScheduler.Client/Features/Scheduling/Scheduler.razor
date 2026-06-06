@@ -2,6 +2,7 @@
 @using LeagueScheduler.Shared.Scheduling
 @inject SchedulerClient SchedulerClient
 @inject IStringLocalizer<SchedulingStrings> L
+@inject IStringLocalizer<CommonStrings> LC
 
 <PageTitle>@L["PageTitle"]</PageTitle>
 
@@ -16,11 +17,16 @@
 @if (Result != null)
 {
     <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@L["ResultsTitle"]</MudText>
-        <MudTable Items="Result.Matches">
+        <MudText Typo="Typo.h6" GutterBottom="true">@L["ResultsTitle"]</MudText>
+
+        <MudTextField @bind-Value="_searchString" Placeholder="@LC["Search"]"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true" Clearable="true" Class="mb-3" Style="max-width:300px" />
+
+        <MudTable Items="@FilteredMatches" Dense="true" Hover="true">
             <HeaderContent>
-                <MudTh>@L["ColDate"]</MudTh>
-                <MudTh>@L["ColCourt"]</MudTh>
+                <MudTh><MudTableSortLabel SortBy="@(new Func<MatchDto, object>(x => x.Date))">@L["ColDate"]</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="@(new Func<MatchDto, object>(x => x.CourtName))">@L["ColCourt"]</MudTableSortLabel></MudTh>
                 <MudTh>@L["ColPlayers"]</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -35,9 +41,20 @@
 @code {
     string RequestJson { get; set; } = string.Empty;
     ScheduleResultDto? Result { get; set; }
+    private string _searchString = string.Empty;
+
+    private IEnumerable<MatchDto> FilteredMatches => Result is null || string.IsNullOrWhiteSpace(_searchString)
+        ? Result?.Matches ?? []
+        : Result.Matches.Where(m =>
+        {
+            var s = _searchString.Trim();
+            return m.Date.ToShortDateString().Contains(s, StringComparison.OrdinalIgnoreCase)
+                || m.CourtName.Contains(s, StringComparison.OrdinalIgnoreCase);
+        });
 
     async Task RunSchedule()
     {
+        _searchString = string.Empty;
         try
         {
             var req = System.Text.Json.JsonSerializer.Deserialize<ScheduleRequestDto>(RequestJson);

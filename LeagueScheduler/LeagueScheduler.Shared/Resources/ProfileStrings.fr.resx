@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>Mon Profil</value></data>
+  <data name="FirstName" xml:space="preserve"><value>Prénom</value></data>
+  <data name="MiddleName" xml:space="preserve"><value>Deuxième prénom</value></data>
+  <data name="LastName" xml:space="preserve"><value>Nom de famille</value></data>
+  <data name="DisplayName" xml:space="preserve"><value>Nom affiché</value></data>
+  <data name="Email" xml:space="preserve"><value>Courriel</value></data>
+  <data name="Pronouns" xml:space="preserve"><value>Pronoms</value></data>
+  <data name="PronounsCustom" xml:space="preserve"><value>Pronoms personnalisés</value></data>
+  <data name="PreferredTimeZone" xml:space="preserve"><value>Fuseau horaire préféré</value></data>
+  <data name="PronounsHisHim" xml:space="preserve"><value>Il / Lui</value></data>
+  <data name="PronounsHerHers" xml:space="preserve"><value>Elle</value></data>
+  <data name="PronounsOther" xml:space="preserve"><value>Autre</value></data>
+  <data name="PronounsNotSpecified" xml:space="preserve"><value>Préfère ne pas préciser</value></data>
+  <data name="FirstNameRequired" xml:space="preserve"><value>Le prénom est requis.</value></data>
+  <data name="LastNameRequired" xml:space="preserve"><value>Le nom de famille est requis.</value></data>
+  <data name="SaveSuccess" xml:space="preserve"><value>Profil enregistré.</value></data>
+  <data name="SaveError" xml:space="preserve"><value>Échec de l'enregistrement du profil.</value></data>
+  <data name="DisplayNameHint" xml:space="preserve"><value>Comment votre nom apparaît aux autres utilisateurs.</value></data>
+</root>

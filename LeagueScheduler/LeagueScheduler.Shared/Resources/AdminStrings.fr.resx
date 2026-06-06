@@ -30,17 +30,12 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
 
-  <data name="AppName" xml:space="preserve"><value>League Scheduler</value></data>
-  <data name="NavHome" xml:space="preserve"><value>Home</value></data>
-  <data name="NavScheduler" xml:space="preserve"><value>Scheduler</value></data>
-  <data name="Language" xml:space="preserve"><value>Language</value></data>
-  <data name="NavLeagues" xml:space="preserve"><value>Leagues</value></data>
-  <data name="NavCourts" xml:space="preserve"><value>Courts</value></data>
-  <data name="NavProfile" xml:space="preserve"><value>My Profile</value></data>
-  <data name="Search" xml:space="preserve"><value>Search</value></data>
-  <data name="Save" xml:space="preserve"><value>Save</value></data>
-  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
-  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
-  <data name="Confirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="NavAdmin" xml:space="preserve"><value>Administration</value></data>
+  <data name="TimeZonesPageTitle" xml:space="preserve"><value>Fuseaux Horaires</value></data>
+  <data name="TimeZonesIntro" xml:space="preserve"><value>Activez ou désactivez les fuseaux horaires disponibles pour les utilisateurs.</value></data>
+  <data name="TimeZoneId" xml:space="preserve"><value>ID IANA</value></data>
+  <data name="TimeZoneDisplayName" xml:space="preserve"><value>Nom affiché</value></data>
+  <data name="TimeZoneOffset" xml:space="preserve"><value>Décalage UTC</value></data>
+  <data name="TimeZoneEnabled" xml:space="preserve"><value>Activé</value></data>
+  <data name="TimeZoneSaveError" xml:space="preserve"><value>Échec de la mise à jour du fuseau horaire.</value></data>
 </root>

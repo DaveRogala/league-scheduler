@@ -43,8 +43,9 @@ namespace LeagueScheduler.Features.Courts
 
                 if (dto.Address is not null && HasData(dto.Address))
                 {
-                    court.Address = FromDto(dto.Address);
-                    court.Address.Id = Guid.NewGuid();
+                    var addr = FromDto(dto.Address);
+                    addr.Id = Guid.NewGuid();
+                    court.Address = addr;
                 }
 
                 db.Courts.Add(court);
@@ -70,8 +71,9 @@ namespace LeagueScheduler.Features.Courts
                 {
                     if (court.Address is null)
                     {
-                        court.Address = FromDto(dto.Address);
-                        court.Address.Id = Guid.NewGuid();
+                        var addr = FromDto(dto.Address);
+                        addr.Id = Guid.NewGuid();
+                        court.Address = addr;
                     }
                     else
                     {

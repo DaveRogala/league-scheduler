@@ -30,17 +30,12 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
 
-  <data name="AppName" xml:space="preserve"><value>League Scheduler</value></data>
-  <data name="NavHome" xml:space="preserve"><value>Home</value></data>
-  <data name="NavScheduler" xml:space="preserve"><value>Scheduler</value></data>
-  <data name="Language" xml:space="preserve"><value>Language</value></data>
-  <data name="NavLeagues" xml:space="preserve"><value>Leagues</value></data>
-  <data name="NavCourts" xml:space="preserve"><value>Courts</value></data>
-  <data name="NavProfile" xml:space="preserve"><value>My Profile</value></data>
-  <data name="Search" xml:space="preserve"><value>Search</value></data>
-  <data name="Save" xml:space="preserve"><value>Save</value></data>
-  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
-  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
-  <data name="Confirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="NavAdmin" xml:space="preserve"><value>Administration</value></data>
+  <data name="TimeZonesPageTitle" xml:space="preserve"><value>Time Zones</value></data>
+  <data name="TimeZonesIntro" xml:space="preserve"><value>Enable or disable the time zones available for users to select in their profile.</value></data>
+  <data name="TimeZoneId" xml:space="preserve"><value>IANA ID</value></data>
+  <data name="TimeZoneDisplayName" xml:space="preserve"><value>Display Name</value></data>
+  <data name="TimeZoneOffset" xml:space="preserve"><value>UTC Offset</value></data>
+  <data name="TimeZoneEnabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="TimeZoneSaveError" xml:space="preserve"><value>Failed to update time zone.</value></data>
 </root>
