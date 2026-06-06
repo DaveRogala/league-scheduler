@@ -1,26 +1,36 @@
 using MudBlazor.Services;
-using LeagueScheduler.Client.Pages;
+using LeagueScheduler.Client.Features.Scheduling;
 using LeagueScheduler.Components;
-using LeagueScheduler.Services;
-using LeagueScheduler.Shared.Models;
+using LeagueScheduler.Features.Scheduling;
+using LeagueScheduler.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MudBlazor services
-builder.Services.AddMudServices();
+var supportedCultures = builder.Configuration
+    .GetSection("Localization:SupportedCultures")
+    .Get<string[]>() ?? ["en-US"];
+var defaultCulture = builder.Configuration["Localization:DefaultCulture"] ?? "en-US";
 
-// Add services to the container.
+builder.Services.AddLocalization();
+builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// Scheduler service
+builder.Services.AddDbContext<AppDbContext>(opts =>
+    opts.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.Configure<ScheduleOptions>(builder.Configuration.GetSection("Scheduling"));
-builder.Services.AddSingleton<IScheduleRepository, JsonScheduleRepository>();
-builder.Services.AddSingleton<ISchedulerService, SchedulerService>();
+builder.Services.AddScoped<IScheduleRepository, EfScheduleRepository>();
+builder.Services.AddScoped<ISchedulerService, SchedulerService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply any pending migrations on startup
+using (var scope = app.Services.CreateScope())
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -28,12 +38,16 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(defaultCulture)
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+app.UseRequestLocalization(localizationOptions);
 
 app.UseAntiforgery();
 
@@ -42,11 +56,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(LeagueScheduler.Client._Imports).Assembly);
 
-// Minimal API endpoint for scheduling
-app.MapPost("/api/scheduler/compute", async (ScheduleRequestDto request, ISchedulerService scheduler) =>
-{
-    var result = await scheduler.ScheduleAsync(request);
-    return Results.Ok(result);
-});
+app.MapSchedulingEndpoints();
 
 app.Run();

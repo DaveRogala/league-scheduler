@@ -1,0 +1,28 @@
+@inject IStringLocalizer<CommonStrings> L
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<MudSelect T="string" Value="@_selectedCulture" ValueChanged="OnCultureChanged"
+           Label="@L["Language"]" Dense="true" Variant="Variant.Outlined" Style="min-width:120px">
+    @foreach (var c in _cultures)
+    {
+        <MudSelectItem Value="@c.Name">@c.NativeName</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    private static readonly System.Globalization.CultureInfo[] _cultures =
+    [
+        new("en-US"),
+        new("fr-CA"),
+    ];
+
+    private string _selectedCulture = System.Globalization.CultureInfo.CurrentCulture.Name;
+
+    private async Task OnCultureChanged(string cultureName)
+    {
+        _selectedCulture = cultureName;
+        await JS.InvokeVoidAsync("blazorCulture.set", cultureName);
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+    }
+}
