@@ -7,7 +7,8 @@ namespace LeagueScheduler.Shared.Scheduling
     {
         public Guid Id { get; init; } = Guid.NewGuid();
         public DateTime Date { get; init; }
-        public int Court { get; init; }
+        public Guid CourtId { get; init; }
+        public string CourtName { get; init; } = string.Empty;
         public List<Guid> PlayerIds { get; init; } = new();
     }
 }
