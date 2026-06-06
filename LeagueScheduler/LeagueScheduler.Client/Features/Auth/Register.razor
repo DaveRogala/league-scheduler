@@ -1,0 +1,88 @@
+@page "/register"
+@inject AuthClient AuthClient
+@inject AppAuthStateProvider AuthState
+@inject NavigationManager Nav
+@inject IStringLocalizer<AuthStrings> L
+
+<PageTitle>@L["RegisterTitle"]</PageTitle>
+
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12" sm="8" md="5" lg="4">
+        <MudCard Class="pa-2 mt-8">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5">@L["RegisterTitle"]</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField @bind-Value="_email" Label="@L["Email"]" InputType="InputType.Email"
+                              Variant="Variant.Outlined" Class="mb-3" />
+                <MudTextField @bind-Value="_displayName" Label="@L["DisplayName"]"
+                              Variant="Variant.Outlined" Class="mb-3" />
+                <MudTextField @bind-Value="_password" Label="@L["Password"]" InputType="InputType.Password"
+                              Variant="Variant.Outlined" Class="mb-3" />
+                <MudTextField @bind-Value="_confirm" Label="@L["ConfirmPassword"]" InputType="InputType.Password"
+                              Variant="Variant.Outlined" />
+                @if (_errors.Count > 0)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mt-3">
+                        @foreach (var e in _errors)
+                        {
+                            <div>@e</div>
+                        }
+                    </MudAlert>
+                }
+            </MudCardContent>
+            <MudCardActions Class="px-4 pb-4 flex-column gap-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                           OnClick="DoRegisterAsync" Disabled="_busy">
+                    @if (_busy)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    }
+                    @L["RegisterButton"]
+                </MudButton>
+                <MudLink Href="/login" Class="mt-1">@L["LoginPrompt"]</MudLink>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    string _email = string.Empty;
+    string _displayName = string.Empty;
+    string _password = string.Empty;
+    string _confirm = string.Empty;
+    List<string> _errors = new();
+    bool _busy;
+
+    async Task DoRegisterAsync()
+    {
+        _errors.Clear();
+        _busy = true;
+        try
+        {
+            var result = await AuthClient.RegisterAsync(new RegisterRequestDto
+            {
+                Email = _email,
+                DisplayName = _displayName,
+                Password = _password,
+                ConfirmPassword = _confirm
+            });
+
+            if (result?.Success == true && result.Token is not null)
+            {
+                await AuthState.NotifyUserLoggedIn(result.Token);
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                _errors = result?.Errors ?? ["An unexpected error occurred."];
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}
