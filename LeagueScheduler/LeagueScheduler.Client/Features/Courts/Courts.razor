@@ -1,0 +1,103 @@
+@page "/courts"
+@attribute [Authorize]
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<CourtStrings> L
+@inject IStringLocalizer<AddressStrings> LA
+@inject CourtClient CourtClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@L["PageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="CreateAsync" Class="mb-4">
+    @L["CreateCourt"]
+</MudButton>
+
+<MudTable Items="_courts" Hover="true" Loading="_loading" Dense="true">
+    <HeaderContent>
+        <MudTh>@L["Name"]</MudTh>
+        <MudTh>@L["Type"]</MudTh>
+        <MudTh>@L["NumberOfCourts"]</MudTh>
+        <MudTh>@L["Lighted"]</MudTh>
+        <MudTh>@LA["SectionTitle"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@L["Name"]">@context.Name</MudTd>
+        <MudTd DataLabel="@L["Type"]">@L[context.Type.ToString()]</MudTd>
+        <MudTd DataLabel="@L["NumberOfCourts"]">@context.NumberOfCourts</MudTd>
+        <MudTd DataLabel="@L["Lighted"]">
+            @if (context.Lighted)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.LightMode" Color="Color.Warning" Size="Size.Small" />
+            }
+        </MudTd>
+        <MudTd DataLabel="@LA["SectionTitle"]">@AddressSummary(context.Address)</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                           title="@LC["Edit"]" OnClick="() => EditAsync(context)" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                           Color="Color.Error" title="@LC["Delete"]"
+                           OnClick="() => DeleteAsync(context)" />
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2" Class="pa-4">@L["NoCourts"]</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    private List<CourtDto> _courts = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _courts = await CourtClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task CreateAsync()
+    {
+        var dialog = await DialogService.ShowAsync<CourtDialog>(L["CreateCourt"]);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private async Task EditAsync(CourtDto court)
+    {
+        var parameters = new DialogParameters<CourtDialog> { { x => x.Court, court } };
+        var dialog = await DialogService.ShowAsync<CourtDialog>(L["EditCourt"], parameters);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private async Task DeleteAsync(CourtDto court)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LC["Confirm"],
+            L["ConfirmDeleteBody"],
+            yesText: LC["Delete"],
+            cancelText: LC["Cancel"]);
+
+        if (confirmed is not true) return;
+
+        var response = await CourtClient.DeleteAsync(court.Id);
+        Snackbar.Add(
+            response.IsSuccessStatusCode ? L["DeleteSuccess"] : L["DeleteError"],
+            response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (response.IsSuccessStatusCode) await RefreshAsync();
+    }
+
+    private static string AddressSummary(AddressDto? a)
+    {
+        if (a is null) return string.Empty;
+        var parts = new[] { a.Locality, a.AdminArea }
+            .Where(s => !string.IsNullOrWhiteSpace(s));
+        return string.Join(", ", parts);
+    }
+}

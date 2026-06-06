@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>Courts</value></data>
+  <data name="CreateCourt" xml:space="preserve"><value>Create Court</value></data>
+  <data name="EditCourt" xml:space="preserve"><value>Edit Court</value></data>
+  <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Type" xml:space="preserve"><value>Type</value></data>
+  <data name="NumberOfCourts" xml:space="preserve"><value>Number of Courts</value></data>
+  <data name="Lighted" xml:space="preserve"><value>Lighted</value></data>
+  <data name="HoursOfOperation" xml:space="preserve"><value>Hours of Operation</value></data>
+  <data name="AccessNotes" xml:space="preserve"><value>Access Notes</value></data>
+  <data name="Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Condition" xml:space="preserve"><value>Condition</value></data>
+  <data name="Outdoor" xml:space="preserve"><value>Outdoor</value></data>
+  <data name="Indoor" xml:space="preserve"><value>Indoor</value></data>
+  <data name="Both" xml:space="preserve"><value>Mixed</value></data>
+  <data name="TabDetails" xml:space="preserve"><value>Details</value></data>
+  <data name="TabLocation" xml:space="preserve"><value>Location</value></data>
+  <data name="NoCourts" xml:space="preserve"><value>No courts yet. Create your first one.</value></data>
+  <data name="ConfirmDeleteBody" xml:space="preserve"><value>Are you sure you want to delete this court? This cannot be undone.</value></data>
+  <data name="NameRequired" xml:space="preserve"><value>Name is required.</value></data>
+  <data name="SaveSuccess" xml:space="preserve"><value>Court saved.</value></data>
+  <data name="DeleteSuccess" xml:space="preserve"><value>Court deleted.</value></data>
+  <data name="SaveError" xml:space="preserve"><value>Failed to save the court.</value></data>
+  <data name="DeleteError" xml:space="preserve"><value>Failed to delete the court.</value></data>
+</root>

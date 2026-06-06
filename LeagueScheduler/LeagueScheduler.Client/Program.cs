@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using LeagueScheduler.Client.Features.Auth;
+using LeagueScheduler.Client.Features.Courts;
 using LeagueScheduler.Client.Features.Leagues;
 using LeagueScheduler.Client.Features.Scheduling;
 using System.Globalization;
@@ -34,6 +35,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<SchedulerClient>();
 builder.Services.AddScoped<AuthClient>();
 builder.Services.AddScoped<LeagueClient>();
+builder.Services.AddScoped<CourtClient>();
 
 var host = builder.Build();
 
