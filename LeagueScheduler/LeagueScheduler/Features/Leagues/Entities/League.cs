@@ -1,6 +1,6 @@
 using LeagueScheduler.Shared.Leagues;
-using LeagueScheduler.Shared.Scheduling;
 using LeagueScheduler.Features.Seasons.Entities;
+using MatchType = LeagueScheduler.Shared.Scheduling.MatchType;
 
 namespace LeagueScheduler.Features.Leagues.Entities
 {

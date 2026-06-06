@@ -24,7 +24,7 @@ namespace LeagueScheduler.Features.Scheduling
                 {
                     Id = m.Id,
                     Date = m.Date,
-                    Court = m.Court,
+                    CourtNumber = m.Court,
                     PlayerIds = [.. m.PlayerIds]
                 }).ToList()
             };
@@ -52,7 +52,7 @@ namespace LeagueScheduler.Features.Scheduling
                 {
                     Id = m.Id,
                     Date = m.Date,
-                    Court = m.Court,
+                    Court = m.CourtNumber,
                     PlayerIds = [.. m.PlayerIds]
                 }).ToList()
             };
