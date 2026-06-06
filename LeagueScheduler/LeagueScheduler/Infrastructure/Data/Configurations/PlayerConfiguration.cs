@@ -16,6 +16,11 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
             e.Property(p => p.Name).IsRequired().HasMaxLength(200);
             e.Property(p => p.Role).HasConversion<string>();
             e.Property(p => p.Nudge).HasConversion<string>();
+            e.HasOne(p => p.Address)
+             .WithMany()
+             .HasForeignKey(p => p.AddressId)
+             .IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
             e.Property(p => p.UnavailableDates)
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, JsonOpts),
