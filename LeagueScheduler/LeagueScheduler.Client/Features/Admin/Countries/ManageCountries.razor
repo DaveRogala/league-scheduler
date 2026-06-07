@@ -1,0 +1,119 @@
+@page "/admin/countries"
+@attribute [Authorize]
+@inject CountryClient CountryClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<AdminStrings> L
+
+<PageTitle>@L["CountriesPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["CountriesPageTitle"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-4">@L["CountriesIntro"]</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="AddAsync" Class="mb-4">
+    @L["CountriesAddButton"]
+</MudButton>
+
+<MudTable Items="_countries" Hover="true" Dense="true" Loading="_loading">
+    <HeaderContent>
+        <MudTh>@L["CountriesColName"]</MudTh>
+        <MudTh>@L["CountriesColCode"]</MudTh>
+        <MudTh>@L["CountriesColRegion1Name"]</MudTh>
+        <MudTh>@L["CountriesColRegion1UseList"]</MudTh>
+        <MudTh>@L["CountriesColDisplayRegion2"]</MudTh>
+        <MudTh>@L["CountriesColRegion2Name"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.Code</MudTd>
+        <MudTd>@context.Region1Name</MudTd>
+        <MudTd>
+            @if (context.Region1UseList)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckBox" Size="Size.Small" Color="Color.Success" />
+            }
+        </MudTd>
+        <MudTd>
+            @if (context.DisplayRegion2)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckBox" Size="Size.Small" Color="Color.Success" />
+            }
+        </MudTd>
+        <MudTd>@context.Region2Name</MudTd>
+        <MudTd Style="text-align:right; white-space:nowrap">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                           OnClick="() => EditAsync(context)" />
+            <MudButton Variant="Variant.Text" Size="Size.Small"
+                       EndIcon="@Icons.Material.Filled.ChevronRight"
+                       OnClick="() => ViewRegions(context)">
+                @L["CountriesManageRegions"]
+            </MudButton>
+            @if (!context.IsBuiltIn)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                               Color="Color.Error"
+                               OnClick="() => DeleteAsync(context)" />
+            }
+            else
+            {
+                <MudTooltip Text="@L["CountriesBuiltInTooltip"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Disabled="true" />
+                </MudTooltip>
+            }
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No countries configured.</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    private List<CountryDto> _countries = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _countries = await CountryClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task AddAsync()
+    {
+        var parameters = new DialogParameters<CountryEditDialog> { { x => x.Country, null } };
+        var dialog = await DialogService.ShowAsync<CountryEditDialog>(L["CountriesAddButton"], parameters);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private async Task EditAsync(CountryDto country)
+    {
+        var parameters = new DialogParameters<CountryEditDialog> { { x => x.Country, country } };
+        var dialog = await DialogService.ShowAsync<CountryEditDialog>(L["CountriesEditButton"], parameters);
+        if (!(await dialog.Result)!.Canceled) await RefreshAsync();
+    }
+
+    private void ViewRegions(CountryDto country) =>
+        Nav.NavigateTo($"/admin/countries/{country.Id}/regions");
+
+    private async Task DeleteAsync(CountryDto country)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Confirm",
+            $"Remove \"{country.Name}\"?",
+            yesText: "Remove",
+            cancelText: "Cancel");
+        if (confirmed is not true) return;
+
+        var resp = await CountryClient.DeleteCountryAsync(country.Id);
+        Snackbar.Add(
+            resp.IsSuccessStatusCode ? L["CountriesDeleteSuccess"] : L["CountriesDeleteError"],
+            resp.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (resp.IsSuccessStatusCode) await RefreshAsync();
+    }
+}

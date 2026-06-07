@@ -1,0 +1,109 @@
+@inject CountryClient CountryClient
+@inject IStringLocalizer<AdminStrings> L
+@inject IStringLocalizer<CommonStrings> LC
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form" @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="_model.Name" Label="@L["CountriesColName"]"
+                          Required="true" Immediate="true" Class="mb-3" />
+            <MudTextField @bind-Value="_model.Code" Label="@L["CountriesColCode"]"
+                          Required="true" Immediate="true" MaxLength="3"
+                          Disabled="_isBuiltIn" Class="mb-3" />
+            <MudNumericField @bind-Value="_model.SortOrder" Label="Sort Order"
+                             Min="0" Class="mb-3" />
+            <MudTextField @bind-Value="_model.Region1Name" Label="@L["CountriesColRegion1Name"]"
+                          Required="true" Immediate="true" Class="mb-3" />
+            <MudCheckBox @bind-Value="_model.Region1UseList"
+                         Label="@L["CountriesColRegion1UseList"]" Class="mb-3" />
+            <MudCheckBox @bind-Value="_model.DisplayRegion2"
+                         Label="@L["CountriesColDisplayRegion2"]" Class="mb-3" />
+            @if (_model.DisplayRegion2)
+            {
+                <MudTextField @bind-Value="_model.Region2Name" Label="@L["CountriesColRegion2Name"]"
+                              Immediate="true" Class="mb-3" />
+            }
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LC["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Disabled="!_isValid || _saving" OnClick="SaveAsync">
+            @LC["Save"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public CountryDto? Country { get; set; }
+
+    private MudForm _form = null!;
+    private bool _isValid;
+    private bool _saving;
+    private bool _isBuiltIn;
+
+    private CountryModel _model = new();
+
+    protected override void OnParametersSet()
+    {
+        if (Country is not null)
+        {
+            _isBuiltIn = Country.IsBuiltIn;
+            _model = new CountryModel
+            {
+                Name = Country.Name,
+                Code = Country.Code,
+                SortOrder = Country.SortOrder,
+                Region1Name = Country.Region1Name,
+                Region1UseList = Country.Region1UseList,
+                DisplayRegion2 = Country.DisplayRegion2,
+                Region2Name = Country.Region2Name
+            };
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        await _form.ValidateAsync();
+        if (!_isValid) return;
+
+        _saving = true;
+        try
+        {
+            var dto = new CountryDto
+            {
+                Id = Country?.Id ?? Guid.Empty,
+                Name = _model.Name.Trim(),
+                Code = _model.Code.Trim().ToUpperInvariant(),
+                SortOrder = _model.SortOrder,
+                Region1Name = _model.Region1Name.Trim(),
+                Region1UseList = _model.Region1UseList,
+                DisplayRegion2 = _model.DisplayRegion2,
+                Region2Name = _model.Region2Name?.Trim()
+            };
+
+            var resp = Country is null
+                ? await CountryClient.AddCountryAsync(dto)
+                : await CountryClient.UpdateCountryAsync(Country.Id, dto);
+
+            if (resp.IsSuccessStatusCode)
+                MudDialog.Close(DialogResult.Ok(true));
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private class CountryModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public int SortOrder { get; set; }
+        public string Region1Name { get; set; } = "State/Province";
+        public bool Region1UseList { get; set; }
+        public bool DisplayRegion2 { get; set; }
+        public string? Region2Name { get; set; }
+    }
+}

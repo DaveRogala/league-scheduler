@@ -1,0 +1,120 @@
+@page "/admin/countries/{CountryId:guid}/regions"
+@attribute [Authorize]
+@inject CountryClient CountryClient
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<AdminStrings> L
+
+<PageTitle>@L["RegionsPageTitle", _countryName]</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="mb-2 px-0" />
+
+<MudText Typo="Typo.h4" GutterBottom="true">@string.Format(L["RegionsPageTitle"], _countryName)</MudText>
+
+<MudStack Row="true" AlignItems="AlignItems.End" Class="mb-4" Style="max-width:600px">
+    <MudTextField @bind-Value="_newCode" Label="@L["RegionsAddCode"]"
+                  Immediate="true" MaxLength="10" Style="max-width:120px" />
+    <MudTextField @bind-Value="_newName" Label="@L["RegionsAddName"]"
+                  Immediate="true" Style="flex:1" OnKeyDown="OnKeyDownAsync" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               Disabled="@(string.IsNullOrWhiteSpace(_newCode) || string.IsNullOrWhiteSpace(_newName) || _saving)"
+               OnClick="AddAsync">
+        @L["RegionsAddButton"]
+    </MudButton>
+</MudStack>
+
+<MudTable Items="_regions" Hover="true" Dense="true" Loading="_loading" Style="max-width:600px">
+    <HeaderContent>
+        <MudTh>@L["RegionsColCode"]</MudTh>
+        <MudTh>@L["RegionsColName"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Code</MudTd>
+        <MudTd>@context.Name</MudTd>
+        <MudTd Style="text-align:right">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                           Color="Color.Error"
+                           OnClick="() => DeleteAsync(context)" />
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No regions defined for this country.</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    [Parameter] public Guid CountryId { get; set; }
+
+    private List<CountryRegionDto> _regions = [];
+    private bool _loading = true;
+    private bool _saving;
+    private string _countryName = string.Empty;
+    private string _newCode = string.Empty;
+    private string _newName = string.Empty;
+
+    private List<BreadcrumbItem> _breadcrumbs =>
+    [
+        new BreadcrumbItem("Administration", href: null, disabled: true),
+        new BreadcrumbItem("Countries", href: "/admin/countries"),
+        new BreadcrumbItem(_countryName, href: null, disabled: true)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var countries = await CountryClient.GetAllAsync() ?? [];
+        _countryName = countries.FirstOrDefault(c => c.Id == CountryId)?.Name ?? "Country";
+        await RefreshAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _regions = await CountryClient.GetRegionsAsync(CountryId) ?? [];
+        _loading = false;
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_newCode) && !string.IsNullOrWhiteSpace(_newName))
+            await AddAsync();
+    }
+
+    private async Task AddAsync()
+    {
+        _saving = true;
+        try
+        {
+            var dto = new CountryRegionDto
+            {
+                Code = _newCode.Trim().ToUpperInvariant(),
+                Name = _newName.Trim(),
+                SortOrder = _regions.Count + 1
+            };
+            var resp = await CountryClient.AddRegionAsync(CountryId, dto);
+            if (resp.IsSuccessStatusCode)
+            {
+                _newCode = string.Empty;
+                _newName = string.Empty;
+                Snackbar.Add(L["RegionsAddSuccess"], Severity.Success);
+                await RefreshAsync();
+            }
+            else
+            {
+                Snackbar.Add(L["RegionsAddError"], Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteAsync(CountryRegionDto region)
+    {
+        var resp = await CountryClient.DeleteRegionAsync(CountryId, region.Id);
+        Snackbar.Add(
+            resp.IsSuccessStatusCode ? L["RegionsDeleteSuccess"] : L["RegionsDeleteError"],
+            resp.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (resp.IsSuccessStatusCode) await RefreshAsync();
+    }
+}

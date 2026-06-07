@@ -2,6 +2,7 @@ using LeagueScheduler.Features.Admin.Logs.Entities;
 using LeagueScheduler.Features.Admin.TimeZones.Entities;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Common.Entities;
+using LeagueScheduler.Features.Countries.Entities;
 using LeagueScheduler.Features.Courts.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
 using LeagueScheduler.Features.Pronouns.Entities;
@@ -26,6 +27,8 @@ namespace LeagueScheduler.Infrastructure.Data
         }
 
         public DbSet<Address> Addresses => Set<Address>();
+        public DbSet<Country> Countries => Set<Country>();
+        public DbSet<CountryRegion> CountryRegions => Set<CountryRegion>();
         public DbSet<Court> Courts => Set<Court>();
         public DbSet<CourtHistory> CourtHistories => Set<CourtHistory>();
         public DbSet<League> Leagues => Set<League>();

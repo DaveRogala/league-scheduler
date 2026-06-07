@@ -1,8 +1,21 @@
 @inject IStringLocalizer<AddressStrings> L
+@inject CountryClient CountryClient
 
 @if (Value is not null)
 {
     <MudText Typo="Typo.subtitle1" Class="mb-3">@L["SectionTitle"]</MudText>
+
+    <MudSelect Value="Value.CountryId" T="Guid?"
+               ValueChanged="OnCountryChangedAsync"
+               Label="@L["Country"]"
+               Clearable="true"
+               Class="mb-3">
+        <MudSelectItem Value="@((Guid?)null)">—</MudSelectItem>
+        @foreach (var c in _countries)
+        {
+            <MudSelectItem Value="@((Guid?)c.Id)">@c.Name</MudSelectItem>
+        }
+    </MudSelect>
 
     @if (Value.VisibleFields.HasFlag(AddressField.Line1))
     {
@@ -20,22 +33,41 @@
     {
         <MudTextField @bind-Value="Value.Locality" Label="@L["Locality"]" Class="mb-3" />
     }
-    @if (Value.VisibleFields.HasFlag(AddressField.AdminArea))
+
+    @if (_selectedCountry is not null)
     {
-        <MudTextField @bind-Value="Value.AdminArea" Label="@L["AdminArea"]" Class="mb-3" />
+        @if (_selectedCountry.Region1UseList && _regions.Count > 0)
+        {
+            <MudSelect Value="Value.AdminAreaId" T="Guid?"
+                       ValueChanged="OnAdminAreaChanged"
+                       Label="@_selectedCountry.Region1Name"
+                       Clearable="true"
+                       Class="mb-3">
+                <MudSelectItem Value="@((Guid?)null)">—</MudSelectItem>
+                @foreach (var r in _regions)
+                {
+                    <MudSelectItem Value="@((Guid?)r.Id)">@r.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+        else
+        {
+            <MudTextField @bind-Value="Value.AdminArea"
+                          Label="@_selectedCountry.Region1Name"
+                          Class="mb-3" />
+        }
+
+        @if (_selectedCountry.DisplayRegion2)
+        {
+            <MudTextField @bind-Value="Value.SubAdminArea"
+                          Label="@(_selectedCountry.Region2Name ?? L["SubAdminArea"])"
+                          Class="mb-3" />
+        }
     }
-    @if (Value.VisibleFields.HasFlag(AddressField.SubAdminArea))
-    {
-        <MudTextField @bind-Value="Value.SubAdminArea" Label="@L["SubAdminArea"]" Class="mb-3" />
-    }
+
     @if (Value.VisibleFields.HasFlag(AddressField.PostalCode))
     {
         <MudTextField @bind-Value="Value.PostalCode" Label="@L["PostalCode"]" Class="mb-3" />
-    }
-    @if (Value.VisibleFields.HasFlag(AddressField.Country))
-    {
-        <MudTextField @bind-Value="Value.CountryCode" Label="@L["CountryCode"]"
-                      MaxLength="2" HelperText="ISO 3166-1 alpha-2" Class="mb-3" />
     }
 
     <MudExpansionPanels Dense="true" Class="mt-2">
@@ -52,24 +84,42 @@
             <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Locality)"
                          ValueChanged="@((bool v) => ToggleField(AddressField.Locality, v))"
                          Label="@L["Locality"]" Dense="true" />
-            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.AdminArea)"
-                         ValueChanged="@((bool v) => ToggleField(AddressField.AdminArea, v))"
-                         Label="@L["AdminArea"]" Dense="true" />
-            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.SubAdminArea)"
-                         ValueChanged="@((bool v) => ToggleField(AddressField.SubAdminArea, v))"
-                         Label="@L["SubAdminArea"]" Dense="true" />
             <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.PostalCode)"
                          ValueChanged="@((bool v) => ToggleField(AddressField.PostalCode, v))"
                          Label="@L["PostalCode"]" Dense="true" />
-            <MudCheckBox Value="Value.VisibleFields.HasFlag(AddressField.Country)"
-                         ValueChanged="@((bool v) => ToggleField(AddressField.Country, v))"
-                         Label="@L["CountryCode"]" Dense="true" />
         </MudExpansionPanel>
     </MudExpansionPanels>
 }
 
 @code {
     [Parameter] public AddressDto Value { get; set; } = new();
+
+    private List<CountryDto> _countries = [];
+    private List<CountryRegionDto> _regions = [];
+    private CountryDto? _selectedCountry => _countries.FirstOrDefault(c => c.Id == Value.CountryId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _countries = await CountryClient.GetAllAsync() ?? [];
+        if (Value.CountryId.HasValue)
+            _regions = await CountryClient.GetRegionsAsync(Value.CountryId.Value) ?? [];
+    }
+
+    private async Task OnCountryChangedAsync(Guid? countryId)
+    {
+        Value.CountryId = countryId;
+        Value.AdminAreaId = null;
+        Value.AdminArea = null;
+        _regions = countryId.HasValue
+            ? await CountryClient.GetRegionsAsync(countryId.Value) ?? []
+            : [];
+    }
+
+    private void OnAdminAreaChanged(Guid? regionId)
+    {
+        Value.AdminAreaId = regionId;
+        Value.AdminArea = _regions.FirstOrDefault(r => r.Id == regionId)?.Name;
+    }
 
     private void ToggleField(AddressField field, bool show)
     {
