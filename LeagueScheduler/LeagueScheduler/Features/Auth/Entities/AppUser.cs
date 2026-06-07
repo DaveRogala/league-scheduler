@@ -1,4 +1,3 @@
-using LeagueScheduler.Shared.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace LeagueScheduler.Features.Auth.Entities
@@ -9,7 +8,7 @@ namespace LeagueScheduler.Features.Auth.Entities
         public string? MiddleName { get; set; }
         public string LastName { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
-        public Pronouns? Pronouns { get; set; }
+        public Guid? PronounsId { get; set; }
         public string? PronounsCustom { get; set; }
         public string? PreferredTimeZone { get; set; }
         public DateTimeOffset? DeletedAt { get; set; }

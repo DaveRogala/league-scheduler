@@ -39,10 +39,8 @@
   <data name="Pronouns" xml:space="preserve"><value>Pronouns</value></data>
   <data name="PronounsCustom" xml:space="preserve"><value>Custom Pronouns</value></data>
   <data name="PreferredTimeZone" xml:space="preserve"><value>Preferred Time Zone</value></data>
-  <data name="PronounsHisHim" xml:space="preserve"><value>He / Him / His</value></data>
-  <data name="PronounsHerHers" xml:space="preserve"><value>She / Her / Hers</value></data>
-  <data name="PronounsOther" xml:space="preserve"><value>Other</value></data>
   <data name="PronounsNotSpecified" xml:space="preserve"><value>Prefer not to say</value></data>
+  <data name="PronounsSelfDescribe" xml:space="preserve"><value>Prefer to self-describe</value></data>
   <data name="FirstNameRequired" xml:space="preserve"><value>First name is required.</value></data>
   <data name="LastNameRequired" xml:space="preserve"><value>Last name is required.</value></data>
   <data name="SaveSuccess" xml:space="preserve"><value>Profile saved.</value></data>

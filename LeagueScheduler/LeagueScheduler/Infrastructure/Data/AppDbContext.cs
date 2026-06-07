@@ -4,6 +4,7 @@ using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Courts.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
+using LeagueScheduler.Features.Pronouns.Entities;
 using LeagueScheduler.Features.SeasonPlayers.Entities;
 using LeagueScheduler.Features.Scheduling.Entities;
 using LeagueScheduler.Features.Seasons.Entities;
@@ -36,6 +37,7 @@ namespace LeagueScheduler.Infrastructure.Data
         public DbSet<ScheduleResult> ScheduleResults => Set<ScheduleResult>();
         public DbSet<ScheduleMatch> ScheduleMatches => Set<ScheduleMatch>();
         public DbSet<SupportedTimeZone> SupportedTimeZones => Set<SupportedTimeZone>();
+        public DbSet<SupportedPronouns> SupportedPronouns => Set<SupportedPronouns>();
         public DbSet<LogEntry> Logs => Set<LogEntry>();
 
         protected override void OnModelCreating(ModelBuilder model)

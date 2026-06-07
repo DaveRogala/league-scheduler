@@ -43,6 +43,7 @@ builder.Services.AddScoped<UserProfileClient>();
 builder.Services.AddScoped<TimeZoneClient>();
 builder.Services.AddScoped<AdminLogClient>();
 builder.Services.AddScoped<CourtHistoryClient>();
+builder.Services.AddScoped<PronounsClient>();
 
 var host = builder.Build();
 
