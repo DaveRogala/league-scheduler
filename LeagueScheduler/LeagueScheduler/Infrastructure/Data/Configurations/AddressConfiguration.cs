@@ -9,6 +9,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<Address> e)
         {
             e.HasKey(a => a.Id);
+            e.Property(a => a.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(a => a.Line1).HasMaxLength(200);
             e.Property(a => a.Line2).HasMaxLength(200);
             e.Property(a => a.Line3).HasMaxLength(200);

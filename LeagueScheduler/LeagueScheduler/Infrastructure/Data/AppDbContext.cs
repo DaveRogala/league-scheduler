@@ -31,6 +31,7 @@ namespace LeagueScheduler.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder model)
         {
             base.OnModelCreating(model);
+            model.HasPostgresExtension("uuid-ossp");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }

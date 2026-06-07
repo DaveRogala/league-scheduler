@@ -13,6 +13,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<Season> e)
         {
             e.HasKey(s => s.Id);
+            e.Property(s => s.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(s => s.Name).IsRequired().HasMaxLength(200);
             e.HasOne(s => s.League)
                 .WithMany(l => l.Seasons)

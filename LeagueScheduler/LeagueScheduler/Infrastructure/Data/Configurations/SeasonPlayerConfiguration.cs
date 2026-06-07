@@ -14,6 +14,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         {
             e.ToTable("SeasonPlayers");
             e.HasKey(p => p.Id);
+            e.Property(p => p.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(p => p.Name).IsRequired().HasMaxLength(200);
             e.Property(p => p.Role).HasConversion<string>();
             e.Property(p => p.Nudge).HasConversion<string>();

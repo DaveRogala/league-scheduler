@@ -30,7 +30,6 @@ namespace LeagueScheduler.Features.Courts
             {
                 var court = new Court
                 {
-                    Id = Guid.NewGuid(),
                     Name = dto.Name.Trim(),
                     Type = dto.Type,
                     NumberOfCourts = dto.NumberOfCourts,
@@ -42,11 +41,7 @@ namespace LeagueScheduler.Features.Courts
                 };
 
                 if (dto.Address is not null && HasData(dto.Address))
-                {
-                    var addr = FromDto(dto.Address);
-                    addr.Id = Guid.NewGuid();
-                    court.Address = addr;
-                }
+                    court.Address = FromDto(dto.Address);
 
                 db.Courts.Add(court);
                 await db.SaveChangesAsync();
@@ -70,11 +65,7 @@ namespace LeagueScheduler.Features.Courts
                 if (dto.Address is not null && HasData(dto.Address))
                 {
                     if (court.Address is null)
-                    {
-                        var addr = FromDto(dto.Address);
-                        addr.Id = Guid.NewGuid();
-                        court.Address = addr;
-                    }
+                        court.Address = FromDto(dto.Address);
                     else
                     {
                         ApplyToEntity(dto.Address, court.Address);

@@ -13,6 +13,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<PrePlannedEvent> e)
         {
             e.HasKey(p => p.Id);
+            e.Property(p => p.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.HasOne(p => p.Season)
                 .WithMany(s => s.PrePlannedEvents)
                 .HasForeignKey(p => p.SeasonId);

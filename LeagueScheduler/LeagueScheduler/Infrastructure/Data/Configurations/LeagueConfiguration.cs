@@ -9,6 +9,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<League> e)
         {
             e.HasKey(l => l.Id);
+            e.Property(l => l.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(l => l.Name).IsRequired().HasMaxLength(200);
             e.Property(l => l.Mode).HasConversion<string>();
             e.Property(l => l.MatchType).HasConversion<string>();
