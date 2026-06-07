@@ -38,4 +38,25 @@
   <data name="TimeZoneOffset" xml:space="preserve"><value>UTC Offset</value></data>
   <data name="TimeZoneEnabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="TimeZoneSaveError" xml:space="preserve"><value>Failed to update time zone.</value></data>
+  <data name="LogsPageTitle" xml:space="preserve"><value>Application Logs</value></data>
+  <data name="LogsSearch" xml:space="preserve"><value>Search messages &amp; exceptions (* wildcard)…</value></data>
+  <data name="LogsCaseSensitive" xml:space="preserve"><value>Aa</value></data>
+  <data name="LogsShowUtc" xml:space="preserve"><value>UTC</value></data>
+  <data name="LogsLevel" xml:space="preserve"><value>Level</value></data>
+  <data name="LogsLevelAll" xml:space="preserve"><value>All levels</value></data>
+  <data name="LogsFrom" xml:space="preserve"><value>From</value></data>
+  <data name="LogsTo" xml:space="preserve"><value>To</value></data>
+  <data name="LogsColTimestamp" xml:space="preserve"><value>Timestamp</value></data>
+  <data name="LogsColLevel" xml:space="preserve"><value>Level</value></data>
+  <data name="LogsColMessage" xml:space="preserve"><value>Message</value></data>
+  <data name="LogsColActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="LogsDeleteConfirm" xml:space="preserve"><value>Delete this log entry?</value></data>
+  <data name="LogsDeleteError" xml:space="preserve"><value>Failed to delete log entry.</value></data>
+  <data name="LogsPurgeLabel" xml:space="preserve"><value>Purge older than {0} days</value></data>
+  <data name="LogsPurgeConfirm" xml:space="preserve"><value>Delete all entries older than {0} days?</value></data>
+  <data name="LogsPurgeSuccess" xml:space="preserve"><value>Purged {0} entries.</value></data>
+  <data name="LogsPurgeError" xml:space="preserve"><value>Purge failed.</value></data>
+  <data name="LogsProperties" xml:space="preserve"><value>Properties</value></data>
+  <data name="LogsException" xml:space="preserve"><value>Exception</value></data>
+  <data name="LogsNavLink" xml:space="preserve"><value>Logs</value></data>
 </root>

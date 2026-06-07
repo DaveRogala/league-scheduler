@@ -11,8 +11,11 @@ namespace LeagueScheduler.Features.Auth
             app.MapPost("/api/auth/register", async (
                 RegisterRequestDto dto,
                 UserManager<AppUser> userManager,
-                JwtService jwt) =>
+                JwtService jwt,
+                ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger(nameof(AuthEndpoints));
+
                 if (dto.Password != dto.ConfirmPassword)
                     return Results.Ok(new AuthResultDto { Errors = ["Passwords do not match."] });
 
@@ -25,11 +28,16 @@ namespace LeagueScheduler.Features.Auth
 
                 var result = await userManager.CreateAsync(user, dto.Password);
                 if (!result.Succeeded)
+                {
+                    logger.LogWarning("Registration failed for {Email}: {Errors}",
+                        dto.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
                     return Results.Ok(new AuthResultDto
                     {
                         Errors = result.Errors.Select(e => e.Description).ToList()
                     });
+                }
 
+                logger.LogInformation("User registered: {Email} ({UserId})", user.Email, user.Id);
                 var token = jwt.GenerateToken(user);
                 return Results.Ok(new AuthResultDto
                 {
@@ -44,16 +52,26 @@ namespace LeagueScheduler.Features.Auth
                 LoginRequestDto dto,
                 UserManager<AppUser> userManager,
                 SignInManager<AppUser> signInManager,
-                JwtService jwt) =>
+                JwtService jwt,
+                ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger(nameof(AuthEndpoints));
+
                 var user = await userManager.FindByEmailAsync(dto.Email);
                 if (user == null)
+                {
+                    logger.LogWarning("Login failed — unknown email: {Email}", dto.Email);
                     return Results.Ok(new AuthResultDto { Errors = ["Invalid email or password."] });
+                }
 
                 var check = await signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: false);
                 if (!check.Succeeded)
+                {
+                    logger.LogWarning("Login failed — wrong password for {Email} ({UserId})", user.Email, user.Id);
                     return Results.Ok(new AuthResultDto { Errors = ["Invalid email or password."] });
+                }
 
+                logger.LogInformation("User logged in: {Email} ({UserId})", user.Email, user.Id);
                 var token = jwt.GenerateToken(user);
                 return Results.Ok(new AuthResultDto
                 {

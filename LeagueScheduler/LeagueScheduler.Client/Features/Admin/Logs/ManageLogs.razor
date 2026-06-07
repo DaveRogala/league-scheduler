@@ -1,0 +1,269 @@
+@page "/admin/logs"
+@attribute [Authorize]
+@inject AdminLogClient LogClient
+@inject UserProfileClient ProfileClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<AdminStrings> L
+@inject IStringLocalizer<CommonStrings> LC
+
+<PageTitle>@L["LogsPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["LogsPageTitle"]</MudText>
+
+<MudGrid Class="mb-4" Spacing="2">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search"
+                      Label="@L["LogsSearch"]"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      DebounceInterval="400"
+                      OnDebounceIntervalElapsed="ReloadAsync" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudSelect Value="_level" ValueChanged="@((string? v) => OnLevelChanged(v))"
+                   Label="@L["LogsLevel"]" Clearable="true">
+            <MudSelectItem Value="@((string?)null)">@L["LogsLevelAll"]</MudSelectItem>
+            @foreach (var lvl in _levels)
+            {
+                <MudSelectItem Value="@lvl">@lvl</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker Date="_fromDate" DateChanged="OnFromDateChanged"
+                       Label="@L["LogsFrom"]" Clearable="true" />
+        <MudTimePicker Time="_fromTime" TimeChanged="OnFromTimeChanged"
+                       AmPm="true" Clearable="true" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker Date="_toDate" DateChanged="OnToDateChanged"
+                       Label="@L["LogsTo"]" Clearable="true" />
+        <MudTimePicker Time="_toTime" TimeChanged="OnToTimeChanged"
+                       AmPm="true" Clearable="true" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2" Class="d-flex align-end gap-3 pb-1">
+        <MudSwitch T="bool" Value="_caseSensitive" ValueChanged="OnCaseSensitiveChanged"
+                   Label="@L["LogsCaseSensitive"]" Color="Color.Primary" />
+        <MudSwitch T="bool" Value="_showUtc" ValueChanged="OnShowUtcChanged"
+                   Label="@L["LogsShowUtc"]" Color="Color.Secondary" />
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mb-3" Spacing="2">
+    <MudItem xs="6" sm="3">
+        <MudNumericField @bind-Value="_purgeDays" Label="Days" Min="1" Max="3650" />
+    </MudItem>
+    <MudItem xs="6" sm="3" Class="d-flex align-end">
+        <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="PurgeAsync" FullWidth="true">
+            @string.Format(L["LogsPurgeLabel"], _purgeDays)
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudTable Dense="true" Hover="true"
+          ServerData="ServerReloadAsync" @ref="_table"
+          RowsPerPage="_pageSize">
+    <HeaderContent>
+        <MudTh><MudTableSortLabel T="LogEntryDto" SortLabel="timestamp">@L["LogsColTimestamp"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel T="LogEntryDto" SortLabel="level">@L["LogsColLevel"]</MudTableSortLabel></MudTh>
+        <MudTh>@L["LogsColMessage"]</MudTh>
+        <MudTh>@L["LogsColActions"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@L["LogsColTimestamp"]" Style="white-space:nowrap">
+            @FormatTimestamp(context.Timestamp)
+        </MudTd>
+        <MudTd DataLabel="@L["LogsColLevel"]">
+            <MudChip T="string" Size="Size.Small" Color="@LevelColor(context.Level)" Variant="Variant.Filled">
+                @context.Level
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="@L["LogsColMessage"]">
+            @context.Message
+            @if (!string.IsNullOrWhiteSpace(context.Exception) || !string.IsNullOrWhiteSpace(context.Properties))
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore"
+                               Size="Size.Small"
+                               OnClick="@(() => ToggleExpand(context.Id))"
+                               Class="ml-1" />
+            }
+            @if (_expanded.Contains(context.Id))
+            {
+                @if (!string.IsNullOrWhiteSpace(context.Exception))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-1 d-block">
+                        <strong>@L["LogsException"]</strong>
+                    </MudText>
+                    <pre style="font-size:0.75rem;overflow-x:auto;white-space:pre-wrap">@context.Exception</pre>
+                }
+                @if (!string.IsNullOrWhiteSpace(context.Properties))
+                {
+                    <MudText Typo="Typo.caption" Class="mt-1 d-block">
+                        <strong>@L["LogsProperties"]</strong>
+                    </MudText>
+                    <pre style="font-size:0.75rem;overflow-x:auto;white-space:pre-wrap">@FormatJson(context.Properties)</pre>
+                }
+            }
+        </MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
+                           Size="Size.Small"
+                           OnClick="@(() => DeleteAsync(context.Id))" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private static readonly string[] _levels = ["Verbose", "Debug", "Information", "Warning", "Error", "Fatal"];
+
+    private MudTable<LogEntryDto> _table = null!;
+    private string? _search;
+    private string? _level;
+    private DateTime? _fromDate;
+    private TimeSpan? _fromTime;
+    private DateTime? _toDate;
+    private TimeSpan? _toTime;
+    private bool _caseSensitive;
+    private bool _showUtc;
+    private TimeZoneInfo? _userTimeZone;
+    private int _pageSize = 50;
+    private int _purgeDays = 90;
+    private readonly HashSet<Guid> _expanded = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var profile = await ProfileClient.GetAsync();
+            if (profile?.PreferredTimeZone is { } tzId)
+                _userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(tzId);
+        }
+        catch { }
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (_table is not null)
+            await _table.ReloadServerData();
+    }
+
+    private async Task<TableData<LogEntryDto>> ServerReloadAsync(TableState state, CancellationToken ct)
+    {
+        try
+        {
+            var from = ToApiTime(_fromDate, _fromTime);
+            var to   = ToApiTime(_toDate,   _toTime);
+
+            var (sortBy, sortAsc) = state.SortDirection switch
+            {
+                SortDirection.Ascending  => (state.SortLabel, true),
+                SortDirection.Descending => (state.SortLabel, false),
+                _                        => ((string?)null, false)
+            };
+
+            var page = await LogClient.GetPageAsync(
+                _level, _search, from, to,
+                state.Page + 1, state.PageSize,
+                _caseSensitive, sortBy, sortAsc);
+
+            return new TableData<LogEntryDto> { Items = page?.Items ?? [], TotalItems = page?.TotalCount ?? 0 };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading logs: {ex.Message}", Severity.Error);
+            return new TableData<LogEntryDto> { Items = [], TotalItems = 0 };
+        }
+    }
+
+    // Interprets the picked date+time in the user's profile timezone (or UTC) and returns UTC.
+    private DateTimeOffset? ToApiTime(DateTime? date, TimeSpan? time)
+    {
+        if (!date.HasValue) return null;
+        var combined = date.Value.Date.Add(time ?? TimeSpan.Zero);
+        var tz = (_showUtc || _userTimeZone is null) ? TimeZoneInfo.Utc : _userTimeZone;
+        var unspecified = DateTime.SpecifyKind(combined, DateTimeKind.Unspecified);
+        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(unspecified, tz));
+    }
+
+    private string FormatTimestamp(DateTimeOffset timestamp)
+    {
+        if (_showUtc || _userTimeZone is null)
+            return timestamp.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss") + " UTC";
+        var local = TimeZoneInfo.ConvertTime(timestamp, _userTimeZone);
+        return local.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    private async Task OnLevelChanged(string? value)    { _level    = value; await ReloadAsync(); }
+    private async Task OnFromDateChanged(DateTime? value) { _fromDate = value; await ReloadAsync(); }
+    private async Task OnFromTimeChanged(TimeSpan? value) { _fromTime = value; if (_fromDate.HasValue) await ReloadAsync(); }
+    private async Task OnToDateChanged(DateTime? value)   { _toDate   = value; await ReloadAsync(); }
+    private async Task OnToTimeChanged(TimeSpan? value)   { _toTime   = value; if (_toDate.HasValue) await ReloadAsync(); }
+    private async Task OnCaseSensitiveChanged(bool value) { _caseSensitive = value; await ReloadAsync(); }
+    private async Task OnShowUtcChanged(bool value)       { _showUtc = value; await ReloadAsync(); }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            L["LogsDeleteConfirm"], (MarkupString)"", yesText: LC["Delete"], cancelText: LC["Cancel"]);
+        if (confirmed != true) return;
+
+        if (await LogClient.DeleteAsync(id))
+        {
+            _expanded.Remove(id);
+            await ReloadAsync();
+        }
+        else
+        {
+            Snackbar.Add(L["LogsDeleteError"], Severity.Error);
+        }
+    }
+
+    private async Task PurgeAsync()
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            string.Format(L["LogsPurgeConfirm"], _purgeDays), (MarkupString)"",
+            yesText: LC["Delete"], cancelText: LC["Cancel"]);
+        if (confirmed != true) return;
+
+        var deleted = await LogClient.PurgeAsync(_purgeDays);
+        if (deleted.HasValue)
+            Snackbar.Add(string.Format(L["LogsPurgeSuccess"], deleted), Severity.Success);
+        else
+            Snackbar.Add(L["LogsPurgeError"], Severity.Error);
+
+        await ReloadAsync();
+    }
+
+    private void ToggleExpand(Guid id)
+    {
+        if (!_expanded.Add(id))
+            _expanded.Remove(id);
+    }
+
+    private static Color LevelColor(string level) => level switch
+    {
+        "Fatal" or "Error" => Color.Error,
+        "Warning"          => Color.Warning,
+        "Information"      => Color.Info,
+        _                  => Color.Default
+    };
+
+    private static string FormatJson(string json)
+    {
+        try
+        {
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            return System.Text.Json.JsonSerializer.Serialize(doc, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            return json;
+        }
+    }
+}

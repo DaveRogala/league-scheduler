@@ -1,3 +1,4 @@
+using LeagueScheduler.Features.Admin.Logs.Entities;
 using LeagueScheduler.Features.Admin.TimeZones.Entities;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Common.Entities;
@@ -27,6 +28,7 @@ namespace LeagueScheduler.Infrastructure.Data
         public DbSet<ScheduleResult> ScheduleResults => Set<ScheduleResult>();
         public DbSet<ScheduleMatch> ScheduleMatches => Set<ScheduleMatch>();
         public DbSet<SupportedTimeZone> SupportedTimeZones => Set<SupportedTimeZone>();
+        public DbSet<LogEntry> Logs => Set<LogEntry>();
 
         protected override void OnModelCreating(ModelBuilder model)
         {
