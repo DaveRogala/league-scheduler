@@ -69,16 +69,16 @@ else
                                           Class="mb-3" />
                         }
 
-                        <MudSelect @bind-Value="_model.PreferredTimeZone"
-                                   Label="@L["PreferredTimeZone"]"
-                                   Clearable="true"
-                                   Class="mb-3">
-                            <MudSelectItem Value="@((string?)null)">—</MudSelectItem>
-                            @foreach (var tz in _timeZones)
-                            {
-                                <MudSelectItem Value="@tz.Id">@FormatTz(tz)</MudSelectItem>
-                            }
-                        </MudSelect>
+                        <MudAutocomplete T="SupportedTimeZoneDto"
+                                         Value="_selectedTz"
+                                         ValueChanged="@((SupportedTimeZoneDto tz) => _selectedTz = tz)"
+                                         SearchFunc="SearchTimeZones"
+                                         ToStringFunc="tz => tz is null ? string.Empty : FormatTz(tz)"
+                                         Label="@L["PreferredTimeZone"]"
+                                         Clearable="true"
+                                         ResetValueOnEmptyText="true"
+                                         Class="mb-3" />
+
                     </MudCardContent>
                     <MudCardActions Class="px-4 pb-4">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary"
@@ -105,6 +105,7 @@ else
     private UserProfileModel _model = new();
     private List<SupportedPronounsDto> _availablePronouns = [];
     private List<SupportedTimeZoneDto> _timeZones = [];
+    private SupportedTimeZoneDto? _selectedTz;
 
     // null = not specified, "other" = self-describe, Guid.ToString() = selected set
     private string? _pronounsValue;
@@ -115,6 +116,9 @@ else
         var pronounsTask = PronounsClient.GetAllAsync();
         var dto = await ProfileClient.GetAsync();
 
+        _timeZones = await tzTask ?? [];
+        _availablePronouns = await pronounsTask ?? [];
+
         if (dto is not null)
         {
             _model = new UserProfileModel
@@ -124,8 +128,7 @@ else
                 MiddleName = dto.MiddleName,
                 LastName = dto.LastName,
                 DisplayName = dto.DisplayName,
-                PronounsCustom = dto.PronounsCustom,
-                PreferredTimeZone = dto.PreferredTimeZone
+                PronounsCustom = dto.PronounsCustom
             };
 
             if (dto.PronounsId.HasValue)
@@ -134,10 +137,10 @@ else
                 _pronounsValue = "other";
             else
                 _pronounsValue = null;
+
+            _selectedTz = _timeZones.FirstOrDefault(tz => tz.Id == dto.PreferredTimeZone);
         }
 
-        _availablePronouns = await pronounsTask ?? [];
-        _timeZones = await tzTask ?? [];
         _loading = false;
     }
 
@@ -166,7 +169,7 @@ else
                 DisplayName = _model.DisplayName,
                 PronounsId = pronounsId,
                 PronounsCustom = pronounsCustom,
-                PreferredTimeZone = _model.PreferredTimeZone
+                PreferredTimeZone = _selectedTz?.Id
             });
 
             Snackbar.Add(
@@ -177,6 +180,16 @@ else
         {
             _saving = false;
         }
+    }
+
+    private Task<IEnumerable<SupportedTimeZoneDto>> SearchTimeZones(string value, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<SupportedTimeZoneDto>>(_timeZones);
+        return Task.FromResult(
+            _timeZones.Where(tz =>
+                tz.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                tz.Id.Contains(value, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string FormatTz(SupportedTimeZoneDto tz)
@@ -195,6 +208,5 @@ else
         public string LastName { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string? PronounsCustom { get; set; }
-        public string? PreferredTimeZone { get; set; }
     }
 }

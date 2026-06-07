@@ -5,17 +5,15 @@
 {
     <MudText Typo="Typo.subtitle1" Class="mb-3">@L["SectionTitle"]</MudText>
 
-    <MudSelect Value="Value.CountryId" T="Guid?"
-               ValueChanged="OnCountryChangedAsync"
-               Label="@L["Country"]"
-               Clearable="true"
-               Class="mb-3">
-        <MudSelectItem Value="@((Guid?)null)">—</MudSelectItem>
-        @foreach (var c in _countries)
-        {
-            <MudSelectItem Value="@((Guid?)c.Id)">@c.Name</MudSelectItem>
-        }
-    </MudSelect>
+    <MudAutocomplete T="CountryDto"
+                     Value="_selectedCountryItem"
+                     ValueChanged="OnCountryChangedAsync"
+                     SearchFunc="SearchCountries"
+                     ToStringFunc="c => c?.Name ?? string.Empty"
+                     Label="@L["Country"]"
+                     Clearable="true"
+                     ResetValueOnEmptyText="true"
+                     Class="mb-3" />
 
     @if (Value.VisibleFields.HasFlag(AddressField.Line1))
     {
@@ -34,33 +32,31 @@
         <MudTextField @bind-Value="Value.Locality" Label="@L["Locality"]" Class="mb-3" />
     }
 
-    @if (_selectedCountry is not null)
+    @if (_selectedCountryItem is not null)
     {
-        @if (_selectedCountry.Region1UseList && _regions.Count > 0)
+        @if (_selectedCountryItem.Region1UseList && _regions.Count > 0)
         {
-            <MudSelect Value="Value.AdminAreaId" T="Guid?"
-                       ValueChanged="OnAdminAreaChanged"
-                       Label="@_selectedCountry.Region1Name"
-                       Clearable="true"
-                       Class="mb-3">
-                <MudSelectItem Value="@((Guid?)null)">—</MudSelectItem>
-                @foreach (var r in _regions)
-                {
-                    <MudSelectItem Value="@((Guid?)r.Id)">@r.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudAutocomplete T="CountryRegionDto"
+                             Value="_selectedRegionItem"
+                             ValueChanged="OnAdminAreaChanged"
+                             SearchFunc="SearchRegions"
+                             ToStringFunc="r => r?.Name ?? string.Empty"
+                             Label="@_selectedCountryItem.Region1Name"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true"
+                             Class="mb-3" />
         }
         else
         {
             <MudTextField @bind-Value="Value.AdminArea"
-                          Label="@_selectedCountry.Region1Name"
+                          Label="@_selectedCountryItem.Region1Name"
                           Class="mb-3" />
         }
 
-        @if (_selectedCountry.DisplayRegion2)
+        @if (_selectedCountryItem.DisplayRegion2)
         {
             <MudTextField @bind-Value="Value.SubAdminArea"
-                          Label="@(_selectedCountry.Region2Name ?? L["SubAdminArea"])"
+                          Label="@(_selectedCountryItem.Region2Name ?? L["SubAdminArea"])"
                           Class="mb-3" />
         }
     }
@@ -96,29 +92,55 @@
 
     private List<CountryDto> _countries = [];
     private List<CountryRegionDto> _regions = [];
-    private CountryDto? _selectedCountry => _countries.FirstOrDefault(c => c.Id == Value.CountryId);
+    private CountryDto? _selectedCountryItem;
+    private CountryRegionDto? _selectedRegionItem;
 
     protected override async Task OnInitializedAsync()
     {
         _countries = await CountryClient.GetAllAsync() ?? [];
         if (Value.CountryId.HasValue)
+        {
+            _selectedCountryItem = _countries.FirstOrDefault(c => c.Id == Value.CountryId);
             _regions = await CountryClient.GetRegionsAsync(Value.CountryId.Value) ?? [];
+            if (Value.AdminAreaId.HasValue)
+                _selectedRegionItem = _regions.FirstOrDefault(r => r.Id == Value.AdminAreaId);
+        }
     }
 
-    private async Task OnCountryChangedAsync(Guid? countryId)
+    private async Task OnCountryChangedAsync(CountryDto? country)
     {
-        Value.CountryId = countryId;
+        _selectedCountryItem = country;
+        Value.CountryId = country?.Id;
         Value.AdminAreaId = null;
         Value.AdminArea = null;
-        _regions = countryId.HasValue
-            ? await CountryClient.GetRegionsAsync(countryId.Value) ?? []
+        _selectedRegionItem = null;
+        _regions = country is not null
+            ? await CountryClient.GetRegionsAsync(country.Id) ?? []
             : [];
     }
 
-    private void OnAdminAreaChanged(Guid? regionId)
+    private void OnAdminAreaChanged(CountryRegionDto? region)
     {
-        Value.AdminAreaId = regionId;
-        Value.AdminArea = _regions.FirstOrDefault(r => r.Id == regionId)?.Name;
+        _selectedRegionItem = region;
+        Value.AdminAreaId = region?.Id;
+        Value.AdminArea = region?.Name;
+    }
+
+    private Task<IEnumerable<CountryDto>> SearchCountries(string value, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<CountryDto>>(_countries);
+        return Task.FromResult(
+            _countries.Where(c => c.Name.Contains(value, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private Task<IEnumerable<CountryRegionDto>> SearchRegions(string value, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<CountryRegionDto>>(_regions);
+        return Task.FromResult(
+            _regions.Where(r => r.Name.Contains(value, StringComparison.OrdinalIgnoreCase)
+                             || r.Code.Contains(value, StringComparison.OrdinalIgnoreCase)));
     }
 
     private void ToggleField(AddressField field, bool show)
