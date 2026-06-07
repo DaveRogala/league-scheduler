@@ -11,11 +11,11 @@ namespace LeagueScheduler.Features.Scheduling
 
         public EfScheduleRepository(AppDbContext db) => _db = db;
 
-        public async Task SaveAsync(ScheduleResultDto dto)
+        public async Task<ScheduleResultDto> SaveAsync(ScheduleResultDto dto)
         {
+            // Do not set Id on entity or matches — the database generates them via uuid_generate_v1mc().
             var entity = new ScheduleResult
             {
-                Id = dto.Id,
                 SeasonId = dto.SeasonId,
                 FairnessToleranceUsed = dto.FairnessToleranceUsed,
                 AssignedCounts = dto.AssignedCounts,
@@ -23,7 +23,6 @@ namespace LeagueScheduler.Features.Scheduling
                 Conflicts = [.. dto.Conflicts],
                 Matches = dto.Matches.Select(m => new ScheduleMatch
                 {
-                    Id = m.Id,
                     Date = m.Date,
                     CourtId = m.CourtId,
                     CourtNumber = 0,
@@ -33,6 +32,13 @@ namespace LeagueScheduler.Features.Scheduling
 
             _db.ScheduleResults.Add(entity);
             await _db.SaveChangesAsync();
+
+            // Return the DTO enriched with the DB-generated IDs.
+            return dto with
+            {
+                Id = entity.Id,
+                Matches = [.. dto.Matches.Zip(entity.Matches, (m, e) => m with { Id = e.Id })]
+            };
         }
 
         public async Task<ScheduleResultDto?> LoadAsync(Guid id)

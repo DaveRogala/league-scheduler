@@ -42,4 +42,5 @@
   <data name="NavLogout" xml:space="preserve"><value>Se déconnecter</value></data>
   <data name="RegisterPrompt" xml:space="preserve"><value>Pas de compte ? Créez-en un</value></data>
   <data name="LoginPrompt" xml:space="preserve"><value>Vous avez un compte ? Se connecter</value></data>
+  <data name="InvalidCredentials" xml:space="preserve"><value>Courriel ou mot de passe invalide.</value></data>
 </root>
