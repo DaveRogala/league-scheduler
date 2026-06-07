@@ -42,6 +42,7 @@ builder.Services.AddScoped<CourtClient>();
 builder.Services.AddScoped<UserProfileClient>();
 builder.Services.AddScoped<TimeZoneClient>();
 builder.Services.AddScoped<AdminLogClient>();
+builder.Services.AddScoped<CourtHistoryClient>();
 
 var host = builder.Build();
 

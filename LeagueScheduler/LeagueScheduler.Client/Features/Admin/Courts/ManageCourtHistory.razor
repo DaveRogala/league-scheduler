@@ -1,0 +1,123 @@
+@page "/admin/courts/{CourtId:guid}/history"
+@attribute [Authorize]
+@inject CourtHistoryClient HistoryClient
+@inject CourtClient CourtClient
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Court History</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="mb-2" />
+
+<MudText Typo="Typo.h4" GutterBottom="true">Court History — @_courtName</MudText>
+
+<MudTable Dense="true" Hover="true"
+          ServerData="LoadPageAsync"
+          @ref="_table"
+          RowsPerPage="_pageSize">
+    <HeaderContent>
+        <MudTh>Date / Time</MudTh>
+        <MudTh>Operation</MudTh>
+        <MudTh>Changed By</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Type</MudTh>
+        <MudTh>Courts</MudTh>
+        <MudTh>Lighted</MudTh>
+        <MudTh>Condition</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Date / Time" Style="white-space:nowrap">
+            @context.ChangedAt.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss") UTC
+        </MudTd>
+        <MudTd DataLabel="Operation">
+            <MudChip T="string" Size="Size.Small" Color="@OperationColor(context.Operation)" Variant="Variant.Filled">
+                @context.Operation
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="Changed By">@(context.ChangedByName ?? context.ChangedById?.ToString("D")[..8] ?? "—")</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Type">@context.Type</MudTd>
+        <MudTd DataLabel="Courts">@context.NumberOfCourts</MudTd>
+        <MudTd DataLabel="Lighted">@(context.Lighted ? "Yes" : "No")</MudTd>
+        <MudTd DataLabel="Condition">@(context.Condition ?? "—")</MudTd>
+        <MudTd>
+            <MudTooltip Text="Revert court to this version">
+                <MudIconButton Icon="@Icons.Material.Filled.Restore"
+                               Size="Size.Small"
+                               OnClick="() => RevertAsync(context)" />
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No history found for this court.</MudText>
+    </NoRecordsContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    [Parameter] public Guid CourtId { get; set; }
+
+    private MudTable<CourtHistoryDto>? _table;
+    private string _courtName = string.Empty;
+    private int _pageSize = 50;
+
+    private List<BreadcrumbItem> _breadcrumbs =>
+    [
+        new("Courts", "/courts"),
+        new(_courtName.Length > 0 ? _courtName : "Court", $"/courts"),
+        new("History", null, disabled: true)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var courts = await CourtClient.GetAllAsync();
+            _courtName = courts?.FirstOrDefault(c => c.Id == CourtId)?.Name ?? CourtId.ToString("D")[..8];
+        }
+        catch { }
+    }
+
+    private async Task<TableData<CourtHistoryDto>> LoadPageAsync(TableState state, CancellationToken ct)
+    {
+        try
+        {
+            var page = await HistoryClient.GetPageAsync(CourtId, state.Page + 1, state.PageSize);
+            return new TableData<CourtHistoryDto>
+            {
+                Items = page?.Items ?? [],
+                TotalItems = page?.TotalCount ?? 0
+            };
+        }
+        catch
+        {
+            Snackbar.Add("Failed to load court history.", Severity.Error);
+            return new TableData<CourtHistoryDto> { Items = [], TotalItems = 0 };
+        }
+    }
+
+    private async Task RevertAsync(CourtHistoryDto snapshot)
+    {
+        var resp = await HistoryClient.RevertAsync(CourtId, snapshot.Id);
+        if (resp.IsSuccessStatusCode)
+        {
+            Snackbar.Add($"Court reverted to version from {snapshot.ChangedAt.UtcDateTime:yyyy-MM-dd HH:mm} UTC.", Severity.Success);
+            await _table!.ReloadServerData();
+        }
+        else
+        {
+            Snackbar.Add("Failed to revert court.", Severity.Error);
+        }
+    }
+
+    private static Color OperationColor(string op) => op switch
+    {
+        "INSERT" => Color.Success,
+        "UPDATE" => Color.Info,
+        "DELETE" => Color.Error,
+        _ => Color.Default
+    };
+}

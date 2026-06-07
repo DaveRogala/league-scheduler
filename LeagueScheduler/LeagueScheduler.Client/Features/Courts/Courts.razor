@@ -6,6 +6,7 @@
 @inject CourtClient CourtClient
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject NavigationManager Nav
 
 <PageTitle>@L["PageTitle"]</PageTitle>
 
@@ -49,6 +50,9 @@
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
                            Color="Color.Error" title="@LC["Delete"]"
                            OnClick="() => DeleteAsync(context)" />
+            <MudIconButton Icon="@Icons.Material.Filled.History" Size="Size.Small"
+                           title="View history"
+                           OnClick="() => ViewHistory(context)" />
         </MudTd>
     </RowTemplate>
     <NoRecordsContent>
@@ -111,6 +115,9 @@
             response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
         if (response.IsSuccessStatusCode) await RefreshAsync();
     }
+
+    private void ViewHistory(CourtDto court) =>
+        Nav.NavigateTo($"/admin/courts/{court.Id}/history");
 
     private static string AddressSummary(AddressDto? a)
     {

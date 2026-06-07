@@ -12,5 +12,7 @@ namespace LeagueScheduler.Features.Auth.Entities
         public Pronouns? Pronouns { get; set; }
         public string? PronounsCustom { get; set; }
         public string? PreferredTimeZone { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
+        public Guid? DeletedById { get; set; }
     }
 }

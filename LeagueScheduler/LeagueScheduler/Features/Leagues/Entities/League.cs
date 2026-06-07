@@ -1,10 +1,11 @@
 using LeagueScheduler.Shared.Leagues;
 using LeagueScheduler.Features.Seasons.Entities;
+using LeagueScheduler.Infrastructure.Audit;
 using MatchType = LeagueScheduler.Shared.Scheduling.MatchType;
 
 namespace LeagueScheduler.Features.Leagues.Entities
 {
-    public class League
+    public class League : AuditableEntity
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
