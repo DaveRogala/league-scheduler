@@ -1,0 +1,218 @@
+@page "/admin/logs"
+@attribute [Authorize]
+@inject AdminLogClient LogClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<AdminStrings> L
+@inject IStringLocalizer<CommonStrings> LC
+
+<PageTitle>@L["LogsPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["LogsPageTitle"]</MudText>
+
+<MudGrid Class="mb-4" Spacing="2">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search"
+                      Label="@L["LogsSearch"]"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      DebounceInterval="400"
+                      OnDebounceIntervalElapsed="ReloadAsync" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudSelect @bind-Value="_level" Label="@L["LogsLevel"]" Clearable="true">
+            <MudSelectItem Value="@((string?)null)">@L["LogsLevelAll"]</MudSelectItem>
+            @foreach (var lvl in _levels)
+            {
+                <MudSelectItem Value="@lvl">@lvl</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_from" Label="@L["LogsFrom"]" Clearable="true" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_to" Label="@L["LogsTo"]" Clearable="true" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2" Class="d-flex align-end">
+        <MudButton Variant="Variant.Outlined" OnClick="ReloadAsync" FullWidth="true">
+            @LC["Search"]
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mb-3" Spacing="2">
+    <MudItem xs="6" sm="3">
+        <MudNumericField @bind-Value="_purgeDays" Label="Days" Min="1" Max="3650" />
+    </MudItem>
+    <MudItem xs="6" sm="3" Class="d-flex align-end">
+        <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="PurgeAsync" FullWidth="true">
+            @string.Format(L["LogsPurgeLabel"], _purgeDays)
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Class="mb-2" />
+}
+
+<MudTable Items="_items" Dense="true" Hover="true" Loading="_loading"
+          ServerData="ServerReloadAsync" @ref="_table"
+          RowsPerPage="_pageSize">
+    <HeaderContent>
+        <MudTh><MudTableSortLabel T="LogEntryDto" SortLabel="timestamp">@L["LogsColTimestamp"]</MudTableSortLabel></MudTh>
+        <MudTh>@L["LogsColLevel"]</MudTh>
+        <MudTh>@L["LogsColMessage"]</MudTh>
+        <MudTh>@L["LogsColActions"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@L["LogsColTimestamp"]" Style="white-space:nowrap">
+            @context.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
+        </MudTd>
+        <MudTd DataLabel="@L["LogsColLevel"]">
+            <MudChip T="string" Size="Size.Small" Color="@LevelColor(context.Level)" Variant="Variant.Filled">
+                @context.Level
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="@L["LogsColMessage"]">
+            @context.Message
+            @if (!string.IsNullOrWhiteSpace(context.Exception) || !string.IsNullOrWhiteSpace(context.Properties))
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore"
+                               Size="Size.Small"
+                               OnClick="@(() => ToggleExpand(context.Id))"
+                               Class="ml-1" />
+            }
+            @if (_expanded.Contains(context.Id))
+            {
+                @if (!string.IsNullOrWhiteSpace(context.Exception))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Error" Class="mt-1 d-block">
+                        <strong>@L["LogsException"]</strong>
+                    </MudText>
+                    <pre style="font-size:0.75rem;overflow-x:auto;white-space:pre-wrap">@context.Exception</pre>
+                }
+                @if (!string.IsNullOrWhiteSpace(context.Properties))
+                {
+                    <MudText Typo="Typo.caption" Class="mt-1 d-block">
+                        <strong>@L["LogsProperties"]</strong>
+                    </MudText>
+                    <pre style="font-size:0.75rem;overflow-x:auto;white-space:pre-wrap">@FormatJson(context.Properties)</pre>
+                }
+            }
+        </MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
+                           Size="Size.Small"
+                           OnClick="@(() => DeleteAsync(context.Id))" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private static readonly string[] _levels = ["Verbose", "Debug", "Information", "Warning", "Error", "Fatal"];
+
+    private MudTable<LogEntryDto> _table = null!;
+    private List<LogEntryDto> _items = [];
+    private bool _loading;
+    private string? _search;
+    private string? _level;
+    private DateTime? _from;
+    private DateTime? _to;
+    private int _pageSize = 50;
+    private int _purgeDays = 90;
+    private int _totalCount;
+    private readonly HashSet<Guid> _expanded = [];
+
+    protected override async Task OnInitializedAsync() => await ReloadAsync();
+
+    private async Task ReloadAsync()
+    {
+        if (_table is not null)
+            await _table.ReloadServerData();
+    }
+
+    private async Task<TableData<LogEntryDto>> ServerReloadAsync(TableState state, CancellationToken _)
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var from = _from.HasValue ? (DateTimeOffset?)new DateTimeOffset(_from.Value, TimeSpan.Zero) : null;
+        var to = _to.HasValue ? (DateTimeOffset?)new DateTimeOffset(_to.Value.AddDays(1).AddTicks(-1), TimeSpan.Zero) : null;
+
+        var page = await LogClient.GetPageAsync(_level, _search, from, to, state.Page + 1, state.PageSize);
+
+        _items = page?.Items ?? [];
+        _totalCount = page?.TotalCount ?? 0;
+        _loading = false;
+
+        return new TableData<LogEntryDto> { Items = _items, TotalItems = _totalCount };
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            L["LogsDeleteConfirm"], (MarkupString)"", yesText: LC["Delete"], cancelText: LC["Cancel"]);
+        if (confirmed != true) return;
+
+        if (await LogClient.DeleteAsync(id))
+        {
+            _expanded.Remove(id);
+            await ReloadAsync();
+        }
+        else
+        {
+            Snackbar.Add(L["LogsDeleteError"], Severity.Error);
+        }
+    }
+
+    private async Task PurgeAsync()
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            string.Format(L["LogsPurgeConfirm"], _purgeDays), (MarkupString)"",
+            yesText: LC["Delete"], cancelText: LC["Cancel"]);
+        if (confirmed != true) return;
+
+        var deleted = await LogClient.PurgeAsync(_purgeDays);
+        if (deleted.HasValue)
+            Snackbar.Add(string.Format(L["LogsPurgeSuccess"], deleted), Severity.Success);
+        else
+            Snackbar.Add(L["LogsPurgeError"], Severity.Error);
+
+        await ReloadAsync();
+    }
+
+    private void ToggleExpand(Guid id)
+    {
+        if (!_expanded.Add(id))
+            _expanded.Remove(id);
+    }
+
+    private static Color LevelColor(string level) => level switch
+    {
+        "Fatal" or "Error" => Color.Error,
+        "Warning"          => Color.Warning,
+        "Information"      => Color.Info,
+        _                  => Color.Default
+    };
+
+    // Pretty-print the JSON properties string; fall back to raw on any parse error.
+    private static string FormatJson(string json)
+    {
+        try
+        {
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            return System.Text.Json.JsonSerializer.Serialize(doc, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            return json;
+        }
+    }
+}

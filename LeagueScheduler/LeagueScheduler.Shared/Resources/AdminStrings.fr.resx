@@ -38,4 +38,23 @@
   <data name="TimeZoneOffset" xml:space="preserve"><value>Décalage UTC</value></data>
   <data name="TimeZoneEnabled" xml:space="preserve"><value>Activé</value></data>
   <data name="TimeZoneSaveError" xml:space="preserve"><value>Échec de la mise à jour du fuseau horaire.</value></data>
+  <data name="LogsPageTitle" xml:space="preserve"><value>Journaux d'application</value></data>
+  <data name="LogsSearch" xml:space="preserve"><value>Rechercher dans les messages, exceptions, propriétés…</value></data>
+  <data name="LogsLevel" xml:space="preserve"><value>Niveau</value></data>
+  <data name="LogsLevelAll" xml:space="preserve"><value>Tous les niveaux</value></data>
+  <data name="LogsFrom" xml:space="preserve"><value>Du</value></data>
+  <data name="LogsTo" xml:space="preserve"><value>Au</value></data>
+  <data name="LogsColTimestamp" xml:space="preserve"><value>Horodatage</value></data>
+  <data name="LogsColLevel" xml:space="preserve"><value>Niveau</value></data>
+  <data name="LogsColMessage" xml:space="preserve"><value>Message</value></data>
+  <data name="LogsColActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="LogsDeleteConfirm" xml:space="preserve"><value>Supprimer cette entrée de journal ?</value></data>
+  <data name="LogsDeleteError" xml:space="preserve"><value>Échec de la suppression de l'entrée.</value></data>
+  <data name="LogsPurgeLabel" xml:space="preserve"><value>Purger les entrées de plus de {0} jours</value></data>
+  <data name="LogsPurgeConfirm" xml:space="preserve"><value>Supprimer toutes les entrées de plus de {0} jours ?</value></data>
+  <data name="LogsPurgeSuccess" xml:space="preserve"><value>{0} entrées purgées.</value></data>
+  <data name="LogsPurgeError" xml:space="preserve"><value>Échec de la purge.</value></data>
+  <data name="LogsProperties" xml:space="preserve"><value>Propriétés</value></data>
+  <data name="LogsException" xml:space="preserve"><value>Exception</value></data>
+  <data name="LogsNavLink" xml:space="preserve"><value>Journaux</value></data>
 </root>
