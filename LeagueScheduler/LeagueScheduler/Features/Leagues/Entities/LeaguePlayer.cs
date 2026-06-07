@@ -1,8 +1,9 @@
 using LeagueScheduler.Features.SeasonPlayers.Entities;
+using LeagueScheduler.Infrastructure.Audit;
 
 namespace LeagueScheduler.Features.Leagues.Entities
 {
-    public class LeaguePlayer
+    public class LeaguePlayer : AuditableEntity
     {
         public Guid LeagueId { get; set; }
         public League League { get; set; } = null!;

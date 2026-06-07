@@ -1,10 +1,11 @@
 using LeagueScheduler.Shared.Courts;
 using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Seasons.Entities;
+using LeagueScheduler.Infrastructure.Audit;
 
 namespace LeagueScheduler.Features.Courts.Entities
 {
-    public class Court
+    public class Court : AuditableEntity
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

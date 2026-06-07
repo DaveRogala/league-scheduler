@@ -9,6 +9,7 @@ using LeagueScheduler.Features.Courts;
 using LeagueScheduler.Features.Leagues;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Scheduling;
+using LeagueScheduler.Infrastructure.Audit;
 using LeagueScheduler.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +19,6 @@ using NpgsqlTypes;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
 using LeagueScheduler.Infrastructure.Logging;
-using System.Globalization;
 using System.Text;
 
 // Surface sink-level errors (connection failures, SQL errors) to stderr in development.
@@ -72,6 +72,9 @@ try
     builder.Services.AddMudServices();
     builder.Services.AddRazorComponents()
         .AddInteractiveWebAssemblyComponents();
+
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
 
     builder.Services.AddDbContext<AppDbContext>(opts =>
         opts.UseNpgsql(connectionString));
@@ -146,6 +149,7 @@ try
     app.MapTimeZoneEndpoints();
     app.MapLeagueEndpoints();
     app.MapCourtEndpoints();
+    app.MapCourtHistoryEndpoints();
     app.MapLogEndpoints();
 
     Log.Information("Application starting");

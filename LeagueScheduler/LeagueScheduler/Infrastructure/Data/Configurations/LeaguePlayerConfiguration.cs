@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeagueScheduler.Infrastructure.Data.Configurations
 {
-    public class LeaguePlayerConfiguration : IEntityTypeConfiguration<LeaguePlayer>
+    public class LeaguePlayerConfiguration : AuditableEntityConfiguration<LeaguePlayer>
     {
-        public void Configure(EntityTypeBuilder<LeaguePlayer> e)
+        protected override void ConfigureEntity(EntityTypeBuilder<LeaguePlayer> e)
         {
             e.HasKey(lp => new { lp.LeagueId, lp.SeasonPlayerId });
             e.HasOne(lp => lp.League)

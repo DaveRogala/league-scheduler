@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeagueScheduler.Infrastructure.Data.Configurations
 {
-    public class SeasonPlayerConfiguration : IEntityTypeConfiguration<SeasonPlayer>
+    public class SeasonPlayerConfiguration : AuditableEntityConfiguration<SeasonPlayer>
     {
         private static readonly JsonSerializerOptions JsonOpts = new();
 
-        public void Configure(EntityTypeBuilder<SeasonPlayer> e)
+        protected override void ConfigureEntity(EntityTypeBuilder<SeasonPlayer> e)
         {
             e.ToTable("SeasonPlayers");
             e.HasKey(p => p.Id);
