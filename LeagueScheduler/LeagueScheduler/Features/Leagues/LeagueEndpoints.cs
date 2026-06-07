@@ -26,7 +26,6 @@ namespace LeagueScheduler.Features.Leagues
             {
                 var league = new League
                 {
-                    Id = Guid.NewGuid(),
                     Name = dto.Name.Trim(),
                     Mode = dto.Mode,
                     MatchType = dto.MatchType,

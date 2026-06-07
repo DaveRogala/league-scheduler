@@ -64,7 +64,7 @@
             }
             else
             {
-                _error = result?.Errors.FirstOrDefault() ?? "Invalid email or password.";
+                _error = result?.Errors.FirstOrDefault() ?? L["InvalidCredentials"];
             }
         }
         finally

@@ -19,7 +19,7 @@ namespace LeagueScheduler.Shared.Scheduling
 
     public record PlayerDto
     {
-        public Guid Id { get; init; } = Guid.NewGuid();
+        public required Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
         public double PreferencePercent { get; init; }
         public PlayerRole Role { get; init; } = PlayerRole.Regular;

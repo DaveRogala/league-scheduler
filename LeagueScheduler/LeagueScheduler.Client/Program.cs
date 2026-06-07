@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using LeagueScheduler.Client.Features.Auth;
 using LeagueScheduler.Client.Features.Courts;
+using LeagueScheduler.Client.Features.Admin.TimeZones;
+using LeagueScheduler.Client.Features.Users;
 using LeagueScheduler.Client.Features.Leagues;
 using LeagueScheduler.Client.Features.Scheduling;
 using System.Globalization;
@@ -36,6 +38,8 @@ builder.Services.AddScoped<SchedulerClient>();
 builder.Services.AddScoped<AuthClient>();
 builder.Services.AddScoped<LeagueClient>();
 builder.Services.AddScoped<CourtClient>();
+builder.Services.AddScoped<UserProfileClient>();
+builder.Services.AddScoped<TimeZoneClient>();
 
 var host = builder.Build();
 

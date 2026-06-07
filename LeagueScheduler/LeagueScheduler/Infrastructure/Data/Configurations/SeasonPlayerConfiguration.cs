@@ -1,18 +1,20 @@
 using System.Text.Json;
-using LeagueScheduler.Features.Players.Entities;
+using LeagueScheduler.Features.SeasonPlayers.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeagueScheduler.Infrastructure.Data.Configurations
 {
-    public class PlayerConfiguration : IEntityTypeConfiguration<Player>
+    public class SeasonPlayerConfiguration : IEntityTypeConfiguration<SeasonPlayer>
     {
         private static readonly JsonSerializerOptions JsonOpts = new();
 
-        public void Configure(EntityTypeBuilder<Player> e)
+        public void Configure(EntityTypeBuilder<SeasonPlayer> e)
         {
+            e.ToTable("SeasonPlayers");
             e.HasKey(p => p.Id);
+            e.Property(p => p.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(p => p.Name).IsRequired().HasMaxLength(200);
             e.Property(p => p.Role).HasConversion<string>();
             e.Property(p => p.Nudge).HasConversion<string>();

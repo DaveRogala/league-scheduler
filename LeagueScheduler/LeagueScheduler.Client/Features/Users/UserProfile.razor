@@ -1,0 +1,174 @@
+@page "/profile"
+@attribute [Authorize]
+@inject IStringLocalizer<ProfileStrings> L
+@inject IStringLocalizer<CommonStrings> LC
+@inject UserProfileClient ProfileClient
+@inject TimeZoneClient TzClient
+@inject ISnackbar Snackbar
+
+<PageTitle>@L["PageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudForm @ref="_form" @bind-IsValid="_isValid">
+        <MudGrid>
+            <MudItem xs="12" md="8" lg="6">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle2" Class="mb-3">@L["Email"]: @_model.Email</MudText>
+
+                        <MudTextField @bind-Value="_model.FirstName"
+                                      Label="@L["FirstName"]"
+                                      Required="true"
+                                      RequiredError="@L["FirstNameRequired"]"
+                                      Immediate="true"
+                                      Class="mb-3" />
+
+                        <MudTextField @bind-Value="_model.MiddleName"
+                                      Label="@L["MiddleName"]"
+                                      Class="mb-3" />
+
+                        <MudTextField @bind-Value="_model.LastName"
+                                      Label="@L["LastName"]"
+                                      Required="true"
+                                      RequiredError="@L["LastNameRequired"]"
+                                      Immediate="true"
+                                      Class="mb-3" />
+
+                        <MudTextField @bind-Value="_model.DisplayName"
+                                      Label="@L["DisplayName"]"
+                                      HelperText="@L["DisplayNameHint"]"
+                                      Required="true"
+                                      Immediate="true"
+                                      Class="mb-3" />
+
+                        <MudSelect @bind-Value="_model.Pronouns"
+                                   Label="@L["Pronouns"]"
+                                   Clearable="true"
+                                   Class="mb-3">
+                            <MudSelectItem Value="@((Pronouns?)null)">@L["PronounsNotSpecified"]</MudSelectItem>
+                            <MudSelectItem Value="@((Pronouns?)Pronouns.HisHim)">@L["PronounsHisHim"]</MudSelectItem>
+                            <MudSelectItem Value="@((Pronouns?)Pronouns.HerHers)">@L["PronounsHerHers"]</MudSelectItem>
+                            <MudSelectItem Value="@((Pronouns?)Pronouns.Other)">@L["PronounsOther"]</MudSelectItem>
+                        </MudSelect>
+
+                        @if (_model.Pronouns == Pronouns.Other)
+                        {
+                            <MudTextField @bind-Value="_model.PronounsCustom"
+                                          Label="@L["PronounsCustom"]"
+                                          Immediate="true"
+                                          Class="mb-3" />
+                        }
+
+                        <MudSelect @bind-Value="_model.PreferredTimeZone"
+                                   Label="@L["PreferredTimeZone"]"
+                                   Clearable="true"
+                                   Class="mb-3">
+                            <MudSelectItem Value="@((string?)null)">—</MudSelectItem>
+                            @foreach (var tz in _timeZones)
+                            {
+                                <MudSelectItem Value="@tz.Id">@FormatTz(tz)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudCardContent>
+                    <MudCardActions Class="px-4 pb-4">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                   Disabled="!_isValid || _saving"
+                                   OnClick="SaveAsync">
+                            @if (_saving)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                            }
+                            @LC["Save"]
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+}
+
+@code {
+    private MudForm _form = null!;
+    private bool _isValid;
+    private bool _loading = true;
+    private bool _saving;
+    private UserProfileModel _model = new();
+    private List<SupportedTimeZoneDto> _timeZones = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var tzTask = TzClient.GetEnabledAsync();
+        var dto = await ProfileClient.GetAsync();
+        if (dto is not null)
+            _model = new UserProfileModel
+            {
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                MiddleName = dto.MiddleName,
+                LastName = dto.LastName,
+                DisplayName = dto.DisplayName,
+                Pronouns = dto.Pronouns,
+                PronounsCustom = dto.PronounsCustom,
+                PreferredTimeZone = dto.PreferredTimeZone
+            };
+        _timeZones = await tzTask ?? [];
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        await _form.ValidateAsync();
+        if (!_isValid) return;
+
+        _saving = true;
+        try
+        {
+            var response = await ProfileClient.UpdateAsync(new UserProfileDto
+            {
+                Email = _model.Email,
+                FirstName = _model.FirstName,
+                MiddleName = _model.MiddleName,
+                LastName = _model.LastName,
+                DisplayName = _model.DisplayName,
+                Pronouns = _model.Pronouns,
+                PronounsCustom = _model.PronounsCustom,
+                PreferredTimeZone = _model.PreferredTimeZone
+            });
+
+            Snackbar.Add(
+                response.IsSuccessStatusCode ? L["SaveSuccess"] : L["SaveError"],
+                response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private static string FormatTz(SupportedTimeZoneDto tz)
+    {
+        var h = (int)Math.Truncate(tz.UtcOffsetHours);
+        var m = (int)Math.Abs((tz.UtcOffsetHours - h) * 60);
+        var offset = m == 0 ? $"UTC{h:+0;-0;+0}" : $"UTC{h:+0;-0;+0}:{m:00}";
+        return $"({offset}) {tz.DisplayName}";
+    }
+
+    private class UserProfileModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string? MiddleName { get; set; }
+        public string LastName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public Pronouns? Pronouns { get; set; }
+        public string? PronounsCustom { get; set; }
+        public string? PreferredTimeZone { get; set; }
+    }
+}

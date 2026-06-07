@@ -1,10 +1,20 @@
 @inject IStringLocalizer<CommonStrings> L
+@inject IStringLocalizer<AdminStrings> LA
 
 <MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@L["NavHome"]</MudNavLink>
     <MudNavLink Href="leagues" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsTennis">@L["NavLeagues"]</MudNavLink>
     <MudNavLink Href="courts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Place">@L["NavCourts"]</MudNavLink>
     <MudNavLink Href="scheduler" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DateRange">@L["NavScheduler"]</MudNavLink>
+    <MudDivider Class="my-2" />
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">@L["NavProfile"]</MudNavLink>
+            <MudNavGroup Title="@LA["NavAdmin"]" Icon="@Icons.Material.Filled.AdminPanelSettings" Expanded="false">
+                <MudNavLink Href="admin/timezones" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Schedule">@LA["TimeZonesPageTitle"]</MudNavLink>
+            </MudNavGroup>
+        </Authorized>
+    </AuthorizeView>
 </MudNavMenu>
 
 <div class="px-3 pt-2">

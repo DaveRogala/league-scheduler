@@ -42,4 +42,5 @@
   <data name="NavLogout" xml:space="preserve"><value>Sign Out</value></data>
   <data name="RegisterPrompt" xml:space="preserve"><value>Don't have an account? Create one</value></data>
   <data name="LoginPrompt" xml:space="preserve"><value>Already have an account? Sign in</value></data>
+  <data name="InvalidCredentials" xml:space="preserve"><value>Invalid email or password.</value></data>
 </root>

@@ -2,7 +2,7 @@ namespace LeagueScheduler.Shared.Scheduling
 {
     public record ScheduleCourtDto
     {
-        public Guid Id { get; init; } = Guid.NewGuid();
+        public required Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
     }
 }

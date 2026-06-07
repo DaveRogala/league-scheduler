@@ -10,7 +10,7 @@ namespace LeagueScheduler.Features.Scheduling
             {
                 var result = await scheduler.ScheduleAsync(request);
                 return Results.Ok(result);
-            });
+            }).RequireAuthorization();
         }
     }
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="NavAdmin" xml:space="preserve"><value>Administration</value></data>
+  <data name="TimeZonesPageTitle" xml:space="preserve"><value>Time Zones</value></data>
+  <data name="TimeZonesIntro" xml:space="preserve"><value>Enable or disable the time zones available for users to select in their profile.</value></data>
+  <data name="TimeZoneId" xml:space="preserve"><value>IANA ID</value></data>
+  <data name="TimeZoneDisplayName" xml:space="preserve"><value>Display Name</value></data>
+  <data name="TimeZoneOffset" xml:space="preserve"><value>UTC Offset</value></data>
+  <data name="TimeZoneEnabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="TimeZoneSaveError" xml:space="preserve"><value>Failed to update time zone.</value></data>
+</root>

@@ -1,8 +1,9 @@
+using LeagueScheduler.Features.Admin.TimeZones.Entities;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Courts.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
-using LeagueScheduler.Features.Players.Entities;
+using LeagueScheduler.Features.SeasonPlayers.Entities;
 using LeagueScheduler.Features.Scheduling.Entities;
 using LeagueScheduler.Features.Seasons.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -19,16 +20,18 @@ namespace LeagueScheduler.Infrastructure.Data
         public DbSet<Court> Courts => Set<Court>();
         public DbSet<League> Leagues => Set<League>();
         public DbSet<LeaguePlayer> LeaguePlayers => Set<LeaguePlayer>();
-        public DbSet<Player> Players => Set<Player>();
+        public DbSet<SeasonPlayer> SeasonPlayers => Set<SeasonPlayer>();
         public DbSet<Season> Seasons => Set<Season>();
         public DbSet<SeasonCourt> SeasonCourts => Set<SeasonCourt>();
         public DbSet<PrePlannedEvent> PrePlannedEvents => Set<PrePlannedEvent>();
         public DbSet<ScheduleResult> ScheduleResults => Set<ScheduleResult>();
         public DbSet<ScheduleMatch> ScheduleMatches => Set<ScheduleMatch>();
+        public DbSet<SupportedTimeZone> SupportedTimeZones => Set<SupportedTimeZone>();
 
         protected override void OnModelCreating(ModelBuilder model)
         {
             base.OnModelCreating(model);
+            model.HasPostgresExtension("uuid-ossp");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }

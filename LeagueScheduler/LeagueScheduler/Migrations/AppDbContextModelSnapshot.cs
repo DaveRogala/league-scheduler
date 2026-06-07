@@ -20,7 +20,30 @@ namespace LeagueScheduler.Migrations
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("LeagueScheduler.Features.Admin.TimeZones.Entities.SupportedTimeZone", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("UtcOffsetHours")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupportedTimeZones");
+                });
 
             modelBuilder.Entity("LeagueScheduler.Features.Auth.Entities.AppUser", b =>
                 {
@@ -46,11 +69,22 @@ namespace LeagueScheduler.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -68,6 +102,15 @@ namespace LeagueScheduler.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("PreferredTimeZone")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Pronouns")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PronounsCustom")
+                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -95,7 +138,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AdminArea")
                         .HasMaxLength(100)
@@ -141,7 +185,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AccessNotes")
                         .HasColumnType("text");
@@ -184,7 +229,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("MatchType")
                         .IsRequired()
@@ -212,7 +258,7 @@ namespace LeagueScheduler.Migrations
                     b.Property<Guid>("LeagueId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PlayerId")
+                    b.Property<Guid>("SeasonPlayerId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsAdmin")
@@ -221,54 +267,19 @@ namespace LeagueScheduler.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("boolean");
 
-                    b.HasKey("LeagueId", "PlayerId");
+                    b.HasKey("LeagueId", "SeasonPlayerId");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("SeasonPlayerId");
 
                     b.ToTable("LeaguePlayers");
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AddressId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Nudge")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double>("PreferencePercent")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UnavailableDates")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddressId");
-
-                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleMatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<Guid?>("CourtId")
                         .HasColumnType("uuid");
@@ -300,7 +311,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AssignedCounts")
                         .IsRequired()
@@ -330,11 +342,49 @@ namespace LeagueScheduler.Migrations
                     b.ToTable("ScheduleResults");
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<Guid?>("AddressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Nudge")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("PreferencePercent")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UnavailableDates")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.ToTable("SeasonPlayers", (string)null);
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.PrePlannedEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<Guid?>("CourtId")
                         .HasColumnType("uuid");
@@ -365,7 +415,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("DaysOfWeek")
                         .IsRequired()
@@ -562,25 +613,15 @@ namespace LeagueScheduler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LeagueScheduler.Features.Players.Entities.Player", "Player")
+                    b.HasOne("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", "SeasonPlayer")
                         .WithMany("LeaguePlayers")
-                        .HasForeignKey("PlayerId")
+                        .HasForeignKey("SeasonPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("League");
 
-                    b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
-                {
-                    b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
-                        .WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Address");
+                    b.Navigation("SeasonPlayer");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleMatch", b =>
@@ -607,6 +648,16 @@ namespace LeagueScheduler.Migrations
                         .HasForeignKey("SeasonId");
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.PrePlannedEvent", b =>
@@ -719,14 +770,14 @@ namespace LeagueScheduler.Migrations
                     b.Navigation("Seasons");
                 });
 
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
-                {
-                    b.Navigation("LeaguePlayers");
-                });
-
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleResult", b =>
                 {
                     b.Navigation("Matches");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.Navigation("LeaguePlayers");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.Season", b =>

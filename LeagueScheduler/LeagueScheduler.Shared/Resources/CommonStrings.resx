@@ -36,6 +36,8 @@
   <data name="Language" xml:space="preserve"><value>Language</value></data>
   <data name="NavLeagues" xml:space="preserve"><value>Leagues</value></data>
   <data name="NavCourts" xml:space="preserve"><value>Courts</value></data>
+  <data name="NavProfile" xml:space="preserve"><value>My Profile</value></data>
+  <data name="Search" xml:space="preserve"><value>Search</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>

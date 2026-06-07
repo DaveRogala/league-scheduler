@@ -2,9 +2,9 @@ using LeagueScheduler.Shared.Scheduling;
 using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
 
-namespace LeagueScheduler.Features.Players.Entities
+namespace LeagueScheduler.Features.SeasonPlayers.Entities
 {
-    public class Player
+    public class SeasonPlayer
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

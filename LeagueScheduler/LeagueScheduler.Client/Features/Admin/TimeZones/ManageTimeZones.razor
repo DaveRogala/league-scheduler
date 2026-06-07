@@ -1,0 +1,82 @@
+@page "/admin/timezones"
+@attribute [Authorize]
+@inject IStringLocalizer<AdminStrings> L
+@inject IStringLocalizer<CommonStrings> LC
+@inject TimeZoneClient TzClient
+@inject ISnackbar Snackbar
+
+<PageTitle>@L["TimeZonesPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["TimeZonesPageTitle"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-3">@L["TimeZonesIntro"]</MudText>
+
+<MudTextField @bind-Value="_searchString" Placeholder="@LC["Search"]"
+              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+              Immediate="true" Clearable="true" Class="mb-4" Style="max-width:300px" />
+
+<MudTable Items="@FilteredZones" Hover="true" Loading="_loading" Dense="true">
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<SupportedTimeZoneDto, object>(x => x.DisplayName))">@L["TimeZoneDisplayName"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<SupportedTimeZoneDto, object>(x => x.Id))">@L["TimeZoneId"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="@(new Func<SupportedTimeZoneDto, object>(x => x.UtcOffsetHours))">@L["TimeZoneOffset"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<SupportedTimeZoneDto, object>(x => x.IsEnabled))">@L["TimeZoneEnabled"]</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@L["TimeZoneDisplayName"]">@context.DisplayName</MudTd>
+        <MudTd DataLabel="@L["TimeZoneId"]">
+            <MudText Typo="Typo.caption">@context.Id</MudText>
+        </MudTd>
+        <MudTd DataLabel="@L["TimeZoneOffset"]">@FormatOffset(context.UtcOffsetHours)</MudTd>
+        <MudTd DataLabel="@L["TimeZoneEnabled"]">
+            <MudSwitch Value="context.IsEnabled"
+                       ValueChanged="(bool v) => ToggleAsync(context, v)"
+                       Color="Color.Primary" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<SupportedTimeZoneDto> _zones = [];
+    private bool _loading = true;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<SupportedTimeZoneDto> FilteredZones => string.IsNullOrWhiteSpace(_searchString)
+        ? _zones
+        : _zones.Where(t =>
+        {
+            var s = _searchString.Trim();
+            return t.DisplayName.Contains(s, StringComparison.OrdinalIgnoreCase)
+                || t.Id.Contains(s, StringComparison.OrdinalIgnoreCase)
+                || FormatOffset(t.UtcOffsetHours).Contains(s, StringComparison.OrdinalIgnoreCase);
+        });
+
+    protected override async Task OnInitializedAsync()
+    {
+        _zones = await TzClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task ToggleAsync(SupportedTimeZoneDto zone, bool enabled)
+    {
+        var updated = zone with { IsEnabled = enabled };
+        var response = await TzClient.UpdateAsync(updated);
+        if (response.IsSuccessStatusCode)
+        {
+            var idx = _zones.IndexOf(zone);
+            _zones[idx] = updated;
+        }
+        else
+        {
+            Snackbar.Add(L["TimeZoneSaveError"], Severity.Error);
+        }
+    }
+
+    private static string FormatOffset(double hours)
+    {
+        var h = (int)Math.Truncate(hours);
+        var m = (int)Math.Abs((hours - h) * 60);
+        return m == 0
+            ? $"UTC{h:+0;-0;+0}"
+            : $"UTC{h:+0;-0;+0}:{m:00}";
+    }
+}
