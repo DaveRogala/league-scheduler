@@ -39,7 +39,9 @@
   <data name="TimeZoneEnabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="TimeZoneSaveError" xml:space="preserve"><value>Failed to update time zone.</value></data>
   <data name="LogsPageTitle" xml:space="preserve"><value>Application Logs</value></data>
-  <data name="LogsSearch" xml:space="preserve"><value>Search messages, exceptions, properties…</value></data>
+  <data name="LogsSearch" xml:space="preserve"><value>Search messages &amp; exceptions (* wildcard)…</value></data>
+  <data name="LogsCaseSensitive" xml:space="preserve"><value>Aa</value></data>
+  <data name="LogsShowUtc" xml:space="preserve"><value>UTC</value></data>
   <data name="LogsLevel" xml:space="preserve"><value>Level</value></data>
   <data name="LogsLevelAll" xml:space="preserve"><value>All levels</value></data>
   <data name="LogsFrom" xml:space="preserve"><value>From</value></data>

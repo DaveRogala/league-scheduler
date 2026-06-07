@@ -17,13 +17,24 @@ namespace LeagueScheduler.Features.Admin.Logs
                 string? search,
                 DateTimeOffset? from,
                 DateTimeOffset? to,
+                bool caseSensitive = false,
+                string? sortBy = null,
+                bool sortAsc = false,
                 int page = 1,
                 int pageSize = 50) =>
             {
-                var query = BuildQuery(db.Logs, level, search, from, to);
+                var query = BuildQuery(db.Logs, level, search, from, to, caseSensitive);
                 int total = await query.CountAsync();
-                var items = await query
-                    .OrderByDescending(l => l.Timestamp)
+
+                IOrderedQueryable<LogEntry> ordered = (sortBy, sortAsc) switch
+                {
+                    ("level", true)  => query.OrderBy(l => l.Level),
+                    ("level", false) => query.OrderByDescending(l => l.Level),
+                    (_, true)        => query.OrderBy(l => l.Timestamp),
+                    _                => query.OrderByDescending(l => l.Timestamp)
+                };
+
+                var items = await ordered
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(l => ToDto(l))
@@ -59,7 +70,8 @@ namespace LeagueScheduler.Features.Admin.Logs
             string? level,
             string? search,
             DateTimeOffset? from,
-            DateTimeOffset? to)
+            DateTimeOffset? to,
+            bool caseSensitive = false)
         {
             if (!string.IsNullOrWhiteSpace(level))
                 source = source.Where(l => l.Level == level);
@@ -70,15 +82,28 @@ namespace LeagueScheduler.Features.Admin.Logs
             if (to.HasValue)
                 source = source.Where(l => l.Timestamp <= to.Value);
 
-            // Full-text search across message, exception, and structured properties.
+            // Search message and exception text. Properties is jsonb and doesn't support
+            // LIKE in PostgreSQL without an explicit ::text cast; omit it from LINQ search.
+            // * is mapped to % for user-friendly wildcards; bare terms are auto-wrapped in %.
             if (!string.IsNullOrWhiteSpace(search))
-                source = source.Where(l =>
-                    l.Message.Contains(search) ||
-                    (l.Exception != null && l.Exception.Contains(search)) ||
-                    (l.Properties != null && l.Properties.Contains(search)));
+            {
+                var pattern = ToLikePattern(search);
+                source = caseSensitive
+                    ? source.Where(l =>
+                        EF.Functions.Like(l.Message, pattern) ||
+                        (l.Exception != null && EF.Functions.Like(l.Exception, pattern)))
+                    : source.Where(l =>
+                        EF.Functions.ILike(l.Message, pattern) ||
+                        (l.Exception != null && EF.Functions.ILike(l.Exception, pattern)));
+            }
 
             return source;
         }
+
+        // Maps * to % for user-friendly wildcards; always wraps in % so wildcards work as
+        // sub-string matchers, not full-string anchors. Use % directly for anchored patterns.
+        private static string ToLikePattern(string search)
+            => $"%{search.Replace("*", "%")}%";
 
         private static LogEntryDto ToDto(LogEntry l) => new()
         {

@@ -7,9 +7,10 @@ namespace LeagueScheduler.Client.Features.Admin.Logs
     {
         public async Task<LogPageDto?> GetPageAsync(
             string? level, string? search, DateTimeOffset? from, DateTimeOffset? to,
-            int page, int pageSize)
+            int page, int pageSize, bool caseSensitive = false,
+            string? sortBy = null, bool sortAsc = false)
         {
-            var query = BuildQuery(level, search, from, to, page, pageSize);
+            var query = BuildQuery(level, search, from, to, page, pageSize, caseSensitive, sortBy, sortAsc);
             return await http.GetFromJsonAsync<LogPageDto>($"/api/admin/logs?{query}");
         }
 
@@ -29,7 +30,7 @@ namespace LeagueScheduler.Client.Features.Admin.Logs
 
         private static string BuildQuery(
             string? level, string? search, DateTimeOffset? from, DateTimeOffset? to,
-            int page, int pageSize)
+            int page, int pageSize, bool caseSensitive, string? sortBy, bool sortAsc)
         {
             var parts = new List<string>
             {
@@ -45,6 +46,13 @@ namespace LeagueScheduler.Client.Features.Admin.Logs
                 parts.Add($"from={Uri.EscapeDataString(from.Value.ToString("O"))}");
             if (to.HasValue)
                 parts.Add($"to={Uri.EscapeDataString(to.Value.ToString("O"))}");
+            if (caseSensitive)
+                parts.Add("caseSensitive=true");
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                parts.Add($"sortBy={Uri.EscapeDataString(sortBy)}");
+                if (sortAsc) parts.Add("sortAsc=true");
+            }
 
             return string.Join("&", parts);
         }

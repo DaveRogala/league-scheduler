@@ -17,8 +17,12 @@ using Microsoft.IdentityModel.Tokens;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
+using LeagueScheduler.Infrastructure.Logging;
 using System.Globalization;
 using System.Text;
+
+// Surface sink-level errors (connection failures, SQL errors) to stderr in development.
+Serilog.Debugging.SelfLog.Enable(Console.Error);
 
 // Bootstrap logger captures startup errors before full Serilog config is ready.
 Log.Logger = new LoggerConfiguration()
@@ -35,10 +39,11 @@ try
     var jwtSecret = builder.Configuration["Jwt:Secret"]
         ?? throw new InvalidOperationException("Jwt:Secret is not configured. Add it to appsettings.Development.json or set the Jwt__Secret environment variable.");
 
-    // Column map must match the LogEntryConfiguration EF schema.
+    // Keys are lowercase to match EF-configured lowercase column names. The sink sends
+    // column and table names unquoted, so PostgreSQL folds them to lowercase on lookup.
     var logColumns = new Dictionary<string, ColumnWriterBase>
     {
-        ["timestamp"]  = new TimestampColumnWriter(NpgsqlDbType.TimestampTz),
+        ["timestamp"]  = new UtcTimestampColumnWriter(),
         ["level"]      = new LevelColumnWriter(renderAsText: true, dbType: NpgsqlDbType.Text),
         ["template"]   = new MessageTemplateColumnWriter(dbType: NpgsqlDbType.Text),
         ["message"]    = new RenderedMessageColumnWriter(dbType: NpgsqlDbType.Text),
@@ -53,7 +58,7 @@ try
         .WriteTo.Console()
         .WriteTo.PostgreSQL(
             connectionString: connectionString,
-            tableName: "Logs",
+            tableName: "logs",
             columnOptions: logColumns,
             needAutoCreateTable: false,
             schemaName: "public"));
