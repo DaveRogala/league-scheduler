@@ -18,26 +18,20 @@
         </MudTooltip>
         <AuthorizeView>
             <Authorized>
-                <MudMenu Dense="true">
-                    <ActivatorContent Context="_">
-                        <MudButton Color="Color.Inherit" Variant="Variant.Text"
-                                   EndIcon="@Icons.Material.Filled.ArrowDropDown">
-                            @(context.User.FindFirst("displayName")?.Value ?? context.User.FindFirst("email")?.Value)
-                        </MudButton>
-                    </ActivatorContent>
-                    <ChildContent>
-                        <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Person">
-                            @LC["NavProfile"]
-                        </MudMenuItem>
-                        <MudDivider />
-                        <div class="px-3 py-2">
-                            <CultureSelector />
-                        </div>
-                        <MudDivider />
-                        <MudMenuItem OnClick="DoLogoutAsync" Icon="@Icons.Material.Filled.Logout">
-                            @L["NavLogout"]
-                        </MudMenuItem>
-                    </ChildContent>
+                <MudMenu Color="Color.Inherit" Variant="Variant.Text" Dense="true"
+                         EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                         Label="@(context.User.FindFirst("displayName")?.Value ?? context.User.FindFirst("email")?.Value ?? string.Empty)">
+                    <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Person">
+                        @LC["NavProfile"]
+                    </MudMenuItem>
+                    <MudDivider />
+                    <div class="px-3 py-2">
+                        <CultureSelector />
+                    </div>
+                    <MudDivider />
+                    <MudMenuItem OnClick="DoLogoutAsync" Icon="@Icons.Material.Filled.Logout">
+                        @L["NavLogout"]
+                    </MudMenuItem>
                 </MudMenu>
             </Authorized>
             <NotAuthorized>
