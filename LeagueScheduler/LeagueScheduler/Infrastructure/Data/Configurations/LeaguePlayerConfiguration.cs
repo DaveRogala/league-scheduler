@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeagueScheduler.Infrastructure.Data.Configurations
 {
-    public class LeaguePlayerConfiguration : IEntityTypeConfiguration<LeaguePlayer>
+    public class LeaguePlayerConfiguration : AuditableEntityConfiguration<LeaguePlayer>
     {
-        public void Configure(EntityTypeBuilder<LeaguePlayer> e)
+        protected override void ConfigureEntity(EntityTypeBuilder<LeaguePlayer> e)
         {
-            e.HasKey(lp => new { lp.LeagueId, lp.PlayerId });
+            e.HasKey(lp => new { lp.LeagueId, lp.SeasonPlayerId });
             e.HasOne(lp => lp.League)
                 .WithMany(l => l.LeaguePlayers)
                 .HasForeignKey(lp => lp.LeagueId);
-            e.HasOne(lp => lp.Player)
+            e.HasOne(lp => lp.SeasonPlayer)
                 .WithMany(p => p.LeaguePlayers)
-                .HasForeignKey(lp => lp.PlayerId);
+                .HasForeignKey(lp => lp.SeasonPlayerId);
         }
     }
 }

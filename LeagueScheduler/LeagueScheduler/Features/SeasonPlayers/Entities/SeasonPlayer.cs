@@ -1,10 +1,11 @@
 using LeagueScheduler.Shared.Scheduling;
 using LeagueScheduler.Features.Common.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
+using LeagueScheduler.Infrastructure.Audit;
 
-namespace LeagueScheduler.Features.Players.Entities
+namespace LeagueScheduler.Features.SeasonPlayers.Entities
 {
-    public class Player
+    public class SeasonPlayer : AuditableEntity
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

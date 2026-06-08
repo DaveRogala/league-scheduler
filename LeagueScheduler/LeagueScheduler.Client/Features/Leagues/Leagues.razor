@@ -10,24 +10,30 @@
 
 <MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled"
-           StartIcon="@Icons.Material.Filled.Add"
-           OnClick="CreateAsync" Class="mb-4">
-    @L["CreateLeague"]
-</MudButton>
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="CreateAsync">
+        @L["CreateLeague"]
+    </MudButton>
+    <MudSpacer />
+    <MudTextField @bind-Value="_searchString" Placeholder="@LC["Search"]"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true" Clearable="true" Style="max-width:300px" />
+</MudStack>
 
-<MudTable Items="_leagues" Hover="true" Loading="_loading" Dense="true">
+<MudTable Items="@FilteredLeagues" Hover="true" Loading="_loading" Dense="true">
     <HeaderContent>
-        <MudTh>@L["Name"]</MudTh>
-        <MudTh>@L["Mode"]</MudTh>
-        <MudTh>@L["MatchType"]</MudTh>
-        <MudTh>@L["RequireApproval"]</MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.Name))">@L["Name"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.Mode))">@L["Mode"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.MatchType?.Name ?? string.Empty))">@L["MatchType"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.RequireApprovalToJoin))">@L["RequireApproval"]</MudTableSortLabel></MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="@L["Name"]">@context.Name</MudTd>
         <MudTd DataLabel="@L["Mode"]">@L[context.Mode.ToString()]</MudTd>
-        <MudTd DataLabel="@L["MatchType"]">@L[context.MatchType.ToString()]</MudTd>
+        <MudTd DataLabel="@L["MatchType"]">@context.MatchType?.Name</MudTd>
         <MudTd DataLabel="@L["RequireApproval"]">
             @if (context.RequireApprovalToJoin)
             {
@@ -54,6 +60,17 @@
 @code {
     private List<LeagueDto> _leagues = [];
     private bool _loading = true;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<LeagueDto> FilteredLeagues => string.IsNullOrWhiteSpace(_searchString)
+        ? _leagues
+        : _leagues.Where(l =>
+        {
+            var s = _searchString.Trim();
+            return l.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
+                || l.Mode.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+                || (l.MatchType?.Name ?? string.Empty).Contains(s, StringComparison.OrdinalIgnoreCase);
+        });
 
     protected override async Task OnInitializedAsync() => await RefreshAsync();
 

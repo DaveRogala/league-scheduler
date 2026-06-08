@@ -6,24 +6,31 @@
 @inject CourtClient CourtClient
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject NavigationManager Nav
 
 <PageTitle>@L["PageTitle"]</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">@L["PageTitle"]</MudText>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled"
-           StartIcon="@Icons.Material.Filled.Add"
-           OnClick="CreateAsync" Class="mb-4">
-    @L["CreateCourt"]
-</MudButton>
+<MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="CreateAsync">
+        @L["CreateCourt"]
+    </MudButton>
+    <MudSpacer />
+    <MudTextField @bind-Value="_searchString" Placeholder="@LC["Search"]"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true" Clearable="true" Style="max-width:300px" />
+</MudStack>
 
-<MudTable Items="_courts" Hover="true" Loading="_loading" Dense="true">
+<MudTable Items="@FilteredCourts" Hover="true" Loading="_loading" Dense="true">
     <HeaderContent>
-        <MudTh>@L["Name"]</MudTh>
-        <MudTh>@L["Type"]</MudTh>
-        <MudTh>@L["NumberOfCourts"]</MudTh>
-        <MudTh>@L["Lighted"]</MudTh>
-        <MudTh>@LA["SectionTitle"]</MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Name))">@L["Name"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Type))">@L["Type"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.NumberOfCourts))">@L["NumberOfCourts"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => x.Lighted))">@L["Lighted"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<CourtDto, object>(x => AddressSummary(x.Address)))">@LA["SectionTitle"]</MudTableSortLabel></MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
@@ -43,6 +50,9 @@
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
                            Color="Color.Error" title="@LC["Delete"]"
                            OnClick="() => DeleteAsync(context)" />
+            <MudIconButton Icon="@Icons.Material.Filled.History" Size="Size.Small"
+                           title="View history"
+                           OnClick="() => ViewHistory(context)" />
         </MudTd>
     </RowTemplate>
     <NoRecordsContent>
@@ -53,6 +63,19 @@
 @code {
     private List<CourtDto> _courts = [];
     private bool _loading = true;
+    private string _searchString = string.Empty;
+
+    private IEnumerable<CourtDto> FilteredCourts => string.IsNullOrWhiteSpace(_searchString)
+        ? _courts
+        : _courts.Where(c =>
+        {
+            var s = _searchString.Trim();
+            return c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
+                || c.Type.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
+                || AddressSummary(c.Address).Contains(s, StringComparison.OrdinalIgnoreCase)
+                || (c.HoursOfOperation?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Description?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false);
+        });
 
     protected override async Task OnInitializedAsync() => await RefreshAsync();
 
@@ -92,6 +115,9 @@
             response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
         if (response.IsSuccessStatusCode) await RefreshAsync();
     }
+
+    private void ViewHistory(CourtDto court) =>
+        Nav.NavigateTo($"/admin/courts/{court.Id}/history");
 
     private static string AddressSummary(AddressDto? a)
     {

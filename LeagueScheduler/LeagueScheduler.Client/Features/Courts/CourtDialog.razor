@@ -86,9 +86,10 @@
                     Line3 = Court.Address.Line3,
                     Locality = Court.Address.Locality,
                     AdminArea = Court.Address.AdminArea,
+                    AdminAreaId = Court.Address.AdminAreaId,
                     SubAdminArea = Court.Address.SubAdminArea,
                     PostalCode = Court.Address.PostalCode,
-                    CountryCode = Court.Address.CountryCode,
+                    CountryId = Court.Address.CountryId,
                     VisibleFields = Court.Address.VisibleFields
                 }
                 : new AddressDto();
@@ -130,5 +131,5 @@
         !string.IsNullOrWhiteSpace(a.AdminArea) ||
         !string.IsNullOrWhiteSpace(a.SubAdminArea) ||
         !string.IsNullOrWhiteSpace(a.PostalCode) ||
-        !string.IsNullOrWhiteSpace(a.CountryCode);
+        a.CountryId.HasValue;
 }

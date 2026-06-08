@@ -30,7 +30,6 @@ namespace LeagueScheduler.Features.Courts
             {
                 var court = new Court
                 {
-                    Id = Guid.NewGuid(),
                     Name = dto.Name.Trim(),
                     Type = dto.Type,
                     NumberOfCourts = dto.NumberOfCourts,
@@ -42,10 +41,7 @@ namespace LeagueScheduler.Features.Courts
                 };
 
                 if (dto.Address is not null && HasData(dto.Address))
-                {
                     court.Address = FromDto(dto.Address);
-                    court.Address.Id = Guid.NewGuid();
-                }
 
                 db.Courts.Add(court);
                 await db.SaveChangesAsync();
@@ -69,10 +65,7 @@ namespace LeagueScheduler.Features.Courts
                 if (dto.Address is not null && HasData(dto.Address))
                 {
                     if (court.Address is null)
-                    {
                         court.Address = FromDto(dto.Address);
-                        court.Address.Id = Guid.NewGuid();
-                    }
                     else
                     {
                         ApplyToEntity(dto.Address, court.Address);
@@ -110,20 +103,14 @@ namespace LeagueScheduler.Features.Courts
             !string.IsNullOrWhiteSpace(a.AdminArea) ||
             !string.IsNullOrWhiteSpace(a.SubAdminArea) ||
             !string.IsNullOrWhiteSpace(a.PostalCode) ||
-            !string.IsNullOrWhiteSpace(a.CountryCode);
+            a.CountryId.HasValue;
 
-        private static Address FromDto(AddressDto a) => new()
+        private static Address FromDto(AddressDto a)
         {
-            Line1 = a.Line1?.Trim(),
-            Line2 = a.Line2?.Trim(),
-            Line3 = a.Line3?.Trim(),
-            Locality = a.Locality?.Trim(),
-            AdminArea = a.AdminArea?.Trim(),
-            SubAdminArea = a.SubAdminArea?.Trim(),
-            PostalCode = a.PostalCode?.Trim(),
-            CountryCode = a.CountryCode?.Trim()?.ToUpperInvariant(),
-            VisibleFields = a.VisibleFields
-        };
+            var entity = new Address();
+            ApplyToEntity(a, entity);
+            return entity;
+        }
 
         private static void ApplyToEntity(AddressDto a, Address entity)
         {
@@ -132,9 +119,10 @@ namespace LeagueScheduler.Features.Courts
             entity.Line3 = a.Line3?.Trim();
             entity.Locality = a.Locality?.Trim();
             entity.AdminArea = a.AdminArea?.Trim();
+            entity.AdminAreaId = a.AdminAreaId;
             entity.SubAdminArea = a.SubAdminArea?.Trim();
             entity.PostalCode = a.PostalCode?.Trim();
-            entity.CountryCode = a.CountryCode?.Trim()?.ToUpperInvariant();
+            entity.CountryId = a.CountryId;
             entity.VisibleFields = a.VisibleFields;
         }
 
@@ -157,9 +145,10 @@ namespace LeagueScheduler.Features.Courts
                 Line3 = c.Address.Line3,
                 Locality = c.Address.Locality,
                 AdminArea = c.Address.AdminArea,
+                AdminAreaId = c.Address.AdminAreaId,
                 SubAdminArea = c.Address.SubAdminArea,
                 PostalCode = c.Address.PostalCode,
-                CountryCode = c.Address.CountryCode,
+                CountryId = c.Address.CountryId,
                 VisibleFields = c.Address.VisibleFields
             } : null
         };

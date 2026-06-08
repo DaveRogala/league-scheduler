@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeagueScheduler.Infrastructure.Data.Configurations
 {
-    public class SeasonConfiguration : IEntityTypeConfiguration<Season>
+    public class SeasonConfiguration : AuditableEntityConfiguration<Season>
     {
         private static readonly JsonSerializerOptions JsonOpts = new();
 
-        public void Configure(EntityTypeBuilder<Season> e)
+        protected override void ConfigureEntity(EntityTypeBuilder<Season> e)
         {
             e.HasKey(s => s.Id);
+            e.Property(s => s.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(s => s.Name).IsRequired().HasMaxLength(200);
             e.HasOne(s => s.League)
                 .WithMany(l => l.Seasons)

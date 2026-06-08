@@ -4,7 +4,7 @@ namespace LeagueScheduler.Features.Scheduling
 {
     public interface IScheduleRepository
     {
-        Task SaveAsync(ScheduleResultDto result);
+        Task<ScheduleResultDto> SaveAsync(ScheduleResultDto result);
         Task<ScheduleResultDto?> LoadAsync(Guid id);
     }
 }

@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/LeagueScheduler/LeagueScheduler/bin/Debug/net9.0/LeagueScheduler.dll",
+      "program": "${workspaceFolder}/LeagueScheduler/LeagueScheduler/bin/Debug/net10.0/LeagueScheduler.dll",
       "args": [],
       "cwd": "${workspaceFolder}/LeagueScheduler/LeagueScheduler",
       "stopAtEntry": false,

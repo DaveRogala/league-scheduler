@@ -1,3 +1,4 @@
+using LeagueScheduler.Features.Countries.Entities;
 using LeagueScheduler.Shared.Common;
 
 namespace LeagueScheduler.Features.Common.Entities
@@ -7,22 +8,25 @@ namespace LeagueScheduler.Features.Common.Entities
         public Guid Id { get; set; }
 
         // ISO 19160-4 thoroughfare / delivery lines
-        public string? Line1 { get; set; }       // Street number + name, PO Box
-        public string? Line2 { get; set; }       // Unit, suite, apt, floor, building
-        public string? Line3 { get; set; }       // Additional delivery info
+        public string? Line1 { get; set; }
+        public string? Line2 { get; set; }
+        public string? Line3 { get; set; }
 
         // ISO 19160-4 place components
-        public string? Locality { get; set; }    // City / municipality
-        public string? AdminArea { get; set; }   // State / province / territory / prefecture
-        public string? SubAdminArea { get; set; } // County / district / arrondissement
+        public string? Locality { get; set; }
+        public string? AdminArea { get; set; }       // free text for custom countries; synced from region name for list countries
+        public Guid? AdminAreaId { get; set; }       // FK to CountryRegion when Region1UseList = true
+        public CountryRegion? AdminAreaRegion { get; set; }
+        public string? SubAdminArea { get; set; }
 
         // Postal
         public string? PostalCode { get; set; }
 
-        // ISO 3166-1 alpha-2 country code
-        public string? CountryCode { get; set; }
+        // FK to Country table
+        public Guid? CountryId { get; set; }
+        public Country? Country { get; set; }
 
-        // Controls which fields are shown in the UI for this address instance
+        // Controls which thoroughfare/postal fields are visible in the UI for this address instance
         public AddressField VisibleFields { get; set; } = AddressField.Standard;
     }
 }

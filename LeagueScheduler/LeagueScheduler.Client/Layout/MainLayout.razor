@@ -1,7 +1,8 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject AppAuthStateProvider AuthState
 @inject NavigationManager Nav
 @inject IStringLocalizer<AuthStrings> L
+@inject IStringLocalizer<CommonStrings> LC
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -12,14 +13,26 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
         <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+        <MudTooltip Text="@_darkModeTooltip" Placement="Placement.Bottom">
+            <MudIconButton Icon="@DarkLightModeButtonIcon" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+        </MudTooltip>
         <AuthorizeView>
             <Authorized>
-                <MudText Class="mr-2" Typo="Typo.body2">
-                    @(context.User.FindFirst("displayName")?.Value ?? context.User.FindFirst("email")?.Value)
-                </MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit"
-                               title="@L["NavLogout"]" OnClick="DoLogoutAsync" />
+                <MudMenu Color="Color.Inherit" Variant="Variant.Text" Dense="true"
+                         EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                         Label="@(context.User.FindFirst("displayName")?.Value ?? context.User.FindFirst("email")?.Value ?? string.Empty)">
+                    <MudMenuItem Href="profile" Icon="@Icons.Material.Filled.Person">
+                        @LC["NavProfile"]
+                    </MudMenuItem>
+                    <MudDivider />
+                    <div class="px-3 py-2">
+                        <CultureSelector />
+                    </div>
+                    <MudDivider />
+                    <MudMenuItem OnClick="DoLogoutAsync" Icon="@Icons.Material.Filled.Logout">
+                        @L["NavLogout"]
+                    </MudMenuItem>
+                </MudMenu>
             </Authorized>
             <NotAuthorized>
                 <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">@L["NavLogin"]</MudButton>
@@ -45,6 +58,8 @@
     private bool _drawerOpen = true;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
+
+    private string _darkModeTooltip => _isDarkMode ? "Switch to day mode" : "Switch to night mode";
 
     protected override void OnInitialized()
     {
@@ -113,11 +128,7 @@
         OverlayLight = "#1e1e2d80",
     };
 
-    public string DarkLightModeButtonIcon => _isDarkMode switch
-    {
-        true => Icons.Material.Rounded.AutoMode,
-        false => Icons.Material.Outlined.DarkMode,
-    };
+    public string DarkLightModeButtonIcon => _isDarkMode
+        ? Icons.Material.Filled.WbSunny
+        : Icons.Material.Filled.DarkMode;
 }
-
-

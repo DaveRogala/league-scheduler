@@ -20,7 +20,71 @@ namespace LeagueScheduler.Migrations
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "uuid-ossp");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("LeagueScheduler.Features.Admin.Logs.Entities.LogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("text")
+                        .HasColumnName("exception");
+
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("level");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("properties");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("template");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("logs", (string)null);
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.Admin.TimeZones.Entities.SupportedTimeZone", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("UtcOffsetHours")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupportedTimeZones");
+                });
 
             modelBuilder.Entity("LeagueScheduler.Features.Auth.Entities.AppUser", b =>
                 {
@@ -35,6 +99,12 @@ namespace LeagueScheduler.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -46,11 +116,22 @@ namespace LeagueScheduler.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -68,6 +149,15 @@ namespace LeagueScheduler.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("PreferredTimeZone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PronounsCustom")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PronounsId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -95,15 +185,18 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AdminArea")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("CountryCode")
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)");
+                    b.Property<Guid?>("AdminAreaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CountryId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Line1")
                         .HasMaxLength(200)
@@ -134,14 +227,120 @@ namespace LeagueScheduler.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AdminAreaId");
+
+                    b.HasIndex("CountryId");
+
                     b.ToTable("Addresses");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.Country", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<bool>("DisplayRegion2")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsBuiltIn")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Region1Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("Region1UseList")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Region2Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Countries");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0001-4000-a000-000000000001"),
+                            Code = "US",
+                            DisplayRegion2 = false,
+                            IsBuiltIn = true,
+                            Name = "United States",
+                            Region1Name = "State",
+                            Region1UseList = true,
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0001-4000-a000-000000000002"),
+                            Code = "CA",
+                            DisplayRegion2 = false,
+                            IsBuiltIn = true,
+                            Name = "Canada",
+                            Region1Name = "Province",
+                            Region1UseList = true,
+                            SortOrder = 2
+                        });
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.CountryRegion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid>("CountryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("CountryRegions");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AccessNotes")
                         .HasColumnType("text");
@@ -151,6 +350,18 @@ namespace LeagueScheduler.Migrations
 
                     b.Property<string>("Condition")
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -173,6 +384,12 @@ namespace LeagueScheduler.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
@@ -180,15 +397,83 @@ namespace LeagueScheduler.Migrations
                     b.ToTable("Courts");
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.CourtHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<string>("AccessNotes")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("AddressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ChangedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("CourtId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("HoursOfOperation")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Lighted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("NumberOfCourts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CourtHistory", (string)null);
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Leagues.Entities.League", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("MatchType")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MatchTypeId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Mode")
                         .IsRequired()
@@ -202,7 +487,15 @@ namespace LeagueScheduler.Migrations
                     b.Property<bool>("RequireApprovalToJoin")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("MatchTypeId");
 
                     b.ToTable("Leagues");
                 });
@@ -212,7 +505,19 @@ namespace LeagueScheduler.Migrations
                     b.Property<Guid>("LeagueId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PlayerId")
+                    b.Property<Guid>("SeasonPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsAdmin")
@@ -221,54 +526,167 @@ namespace LeagueScheduler.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("boolean");
 
-                    b.HasKey("LeagueId", "PlayerId");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.HasIndex("PlayerId");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("LeagueId", "SeasonPlayerId");
+
+                    b.HasIndex("SeasonPlayerId");
 
                     b.ToTable("LeaguePlayers");
                 });
 
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
+            modelBuilder.Entity("LeagueScheduler.Features.MatchTypes.Entities.MatchType", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
-                    b.Property<Guid?>("AddressId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsBuiltIn")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxPlayersPerCourt")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinPlayersPerCourt")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("MustHaveEvenPlayers")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<string>("Nudge")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double>("PreferencePercent")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UnavailableDates")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressId");
+                    b.HasIndex("Name")
+                        .IsUnique();
 
-                    b.ToTable("Players");
+                    b.ToTable("MatchTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0002-4000-a000-000000000001"),
+                            Description = "Singles",
+                            IsBuiltIn = true,
+                            MaxPlayersPerCourt = 2,
+                            MinPlayersPerCourt = 2,
+                            MustHaveEvenPlayers = true,
+                            Name = "Singles",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0002-4000-a000-000000000002"),
+                            Description = "Doubles",
+                            IsBuiltIn = true,
+                            MaxPlayersPerCourt = 4,
+                            MinPlayersPerCourt = 4,
+                            MustHaveEvenPlayers = true,
+                            Name = "Doubles",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0002-4000-a000-000000000003"),
+                            Description = "Three player tennis where the single player takes on two players. The single player can hit into the entire doubles court where the doubles side can only hit into the singles court. Additional rule modifications include rotating players so that the single player is always serving and counting only wins when serving with a 'first to N wins' rule.",
+                            IsBuiltIn = true,
+                            MaxPlayersPerCourt = 3,
+                            MinPlayersPerCourt = 3,
+                            MustHaveEvenPlayers = false,
+                            Name = "Canadian Doubles",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0002-4000-a000-000000000004"),
+                            Description = "Also known as 'two-ball live.' A point starts with both players on one side simultaneously feeding a ball and playing a singles point until one pair misses, at which point a player on the pair that misses yells 'Dingles!' or 'Live!' where it becomes a standard doubles point. Singles play can be down the line or cross-court. Simultaneous 'Dingles' (both balls miss at the same time) results in no-point and the point starts again. Sides alternate feeding either every point or after an agreed upon number of points.",
+                            IsBuiltIn = true,
+                            MaxPlayersPerCourt = 4,
+                            MinPlayersPerCourt = 4,
+                            MustHaveEvenPlayers = true,
+                            Name = "Dingles",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("4b6f3f9e-0002-4000-a000-000000000005"),
+                            Description = "A format where there are more players than court slots. Players rotate on an agreed upon basis, usually after a fixed time or fixed number of games. If score is kept it is usually on a player-by-player basis by counting games that the player's team won. If there are only four players then the players can either play standard doubles matches or rotate.",
+                            IsBuiltIn = true,
+                            MaxPlayersPerCourt = 8,
+                            MinPlayersPerCourt = 4,
+                            MustHaveEvenPlayers = false,
+                            Name = "Round-Robin",
+                            SortOrder = 5
+                        });
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.Pronouns.Entities.SupportedPronouns", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<bool>("IsBuiltIn")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupportedPronouns");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa1"),
+                            IsBuiltIn = true,
+                            Label = "He / Him / His",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa2"),
+                            IsBuiltIn = true,
+                            Label = "She / Her / Hers",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa3"),
+                            IsBuiltIn = true,
+                            Label = "They / Them / Theirs",
+                            SortOrder = 3
+                        });
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleMatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<Guid?>("CourtId")
                         .HasColumnType("uuid");
@@ -300,7 +718,8 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<string>("AssignedCounts")
                         .IsRequired()
@@ -330,11 +749,67 @@ namespace LeagueScheduler.Migrations
                     b.ToTable("ScheduleResults");
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<Guid?>("AddressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Nudge")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("PreferencePercent")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UnavailableDates")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.ToTable("SeasonPlayers", (string)null);
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.PrePlannedEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
 
                     b.Property<Guid?>("CourtId")
                         .HasColumnType("uuid");
@@ -365,11 +840,24 @@ namespace LeagueScheduler.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v1mc()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<string>("DaysOfWeek")
                         .IsRequired()
                         .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
@@ -388,6 +876,12 @@ namespace LeagueScheduler.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -544,6 +1038,34 @@ namespace LeagueScheduler.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.Common.Entities.Address", b =>
+                {
+                    b.HasOne("LeagueScheduler.Features.Countries.Entities.CountryRegion", "AdminAreaRegion")
+                        .WithMany()
+                        .HasForeignKey("AdminAreaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("LeagueScheduler.Features.Countries.Entities.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("AdminAreaRegion");
+
+                    b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.CountryRegion", b =>
+                {
+                    b.HasOne("LeagueScheduler.Features.Countries.Entities.Country", "Country")
+                        .WithMany("Regions")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>
                 {
                     b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
@@ -554,6 +1076,17 @@ namespace LeagueScheduler.Migrations
                     b.Navigation("Address");
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.Leagues.Entities.League", b =>
+                {
+                    b.HasOne("LeagueScheduler.Features.MatchTypes.Entities.MatchType", "MatchType")
+                        .WithMany()
+                        .HasForeignKey("MatchTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MatchType");
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Leagues.Entities.LeaguePlayer", b =>
                 {
                     b.HasOne("LeagueScheduler.Features.Leagues.Entities.League", "League")
@@ -562,25 +1095,15 @@ namespace LeagueScheduler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LeagueScheduler.Features.Players.Entities.Player", "Player")
+                    b.HasOne("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", "SeasonPlayer")
                         .WithMany("LeaguePlayers")
-                        .HasForeignKey("PlayerId")
+                        .HasForeignKey("SeasonPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("League");
 
-                    b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
-                {
-                    b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
-                        .WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Address");
+                    b.Navigation("SeasonPlayer");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleMatch", b =>
@@ -607,6 +1130,16 @@ namespace LeagueScheduler.Migrations
                         .HasForeignKey("SeasonId");
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.PrePlannedEvent", b =>
@@ -707,6 +1240,11 @@ namespace LeagueScheduler.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.Country", b =>
+                {
+                    b.Navigation("Regions");
+                });
+
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>
                 {
                     b.Navigation("SeasonCourts");
@@ -719,14 +1257,14 @@ namespace LeagueScheduler.Migrations
                     b.Navigation("Seasons");
                 });
 
-            modelBuilder.Entity("LeagueScheduler.Features.Players.Entities.Player", b =>
-                {
-                    b.Navigation("LeaguePlayers");
-                });
-
             modelBuilder.Entity("LeagueScheduler.Features.Scheduling.Entities.ScheduleResult", b =>
                 {
                     b.Navigation("Matches");
+                });
+
+            modelBuilder.Entity("LeagueScheduler.Features.SeasonPlayers.Entities.SeasonPlayer", b =>
+                {
+                    b.Navigation("LeaguePlayers");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Seasons.Entities.Season", b =>

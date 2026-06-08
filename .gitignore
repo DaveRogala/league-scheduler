@@ -11,6 +11,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+# Allow source files in Features/Admin/Logs/ — the [Ll]ogs/ rule above would otherwise exclude them
+!**/Features/**/Logs/
+!**/Features/**/Logs/**
 
 # Visual Studio
 .vs/

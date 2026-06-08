@@ -13,6 +13,7 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<ScheduleMatch> e)
         {
             e.HasKey(m => m.Id);
+            e.Property(m => m.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             // Map CourtNumber to the existing "Court" column from the InitialCreate migration
             e.Property(m => m.CourtNumber).HasColumnName("Court");
             e.HasOne(m => m.Court)

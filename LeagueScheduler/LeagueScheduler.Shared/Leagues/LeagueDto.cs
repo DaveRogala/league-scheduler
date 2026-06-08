@@ -1,5 +1,4 @@
-using LeagueScheduler.Shared.Scheduling;
-using MatchType = LeagueScheduler.Shared.Scheduling.MatchType;
+using LeagueScheduler.Shared.MatchTypes;
 
 namespace LeagueScheduler.Shared.Leagues
 {
@@ -8,7 +7,8 @@ namespace LeagueScheduler.Shared.Leagues
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public LeagueMode Mode { get; set; } = LeagueMode.Recreational;
-        public MatchType MatchType { get; set; } = MatchType.Doubles;
+        public Guid MatchTypeId { get; set; }
+        public MatchTypeDto? MatchType { get; set; }
         public bool RequireApprovalToJoin { get; set; }
     }
 }
