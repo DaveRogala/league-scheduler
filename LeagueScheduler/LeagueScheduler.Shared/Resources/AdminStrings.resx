@@ -118,4 +118,37 @@
   <data name="MatchTypeDeleteConfirm" xml:space="preserve"><value>Are you sure you want to delete this match type?</value></data>
   <data name="MatchTypeDeleteSuccess" xml:space="preserve"><value>Match type deleted.</value></data>
   <data name="MatchTypeDeleteError" xml:space="preserve"><value>Failed to delete match type.</value></data>
+
+  <data name="UsersNavLink" xml:space="preserve"><value>Users</value></data>
+  <data name="UsersPageTitle" xml:space="preserve"><value>Manage Users</value></data>
+  <data name="UsersIntro" xml:space="preserve"><value>View and manage user accounts — reset passwords, disable or enable accounts, and impersonate users for troubleshooting.</value></data>
+  <data name="UsersSearch" xml:space="preserve"><value>Search by email or display name…</value></data>
+  <data name="UsersNoItems" xml:space="preserve"><value>No users found.</value></data>
+  <data name="UsersColEmail" xml:space="preserve"><value>Email</value></data>
+  <data name="UsersColDisplayName" xml:space="preserve"><value>Display Name</value></data>
+  <data name="UsersColStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="UsersColRoles" xml:space="preserve"><value>Roles</value></data>
+  <data name="UsersStatusActive" xml:space="preserve"><value>Active</value></data>
+  <data name="UsersStatusDisabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="UsersDisable" xml:space="preserve"><value>Disable</value></data>
+  <data name="UsersEnable" xml:space="preserve"><value>Enable</value></data>
+  <data name="UsersDisableConfirm" xml:space="preserve"><value>Disable this user's account? They will not be able to log in.</value></data>
+  <data name="UsersEnableConfirm" xml:space="preserve"><value>Re-enable this user's account?</value></data>
+  <data name="UsersDisableSuccess" xml:space="preserve"><value>Account disabled.</value></data>
+  <data name="UsersDisableError" xml:space="preserve"><value>Failed to disable account.</value></data>
+  <data name="UsersEnableSuccess" xml:space="preserve"><value>Account enabled.</value></data>
+  <data name="UsersEnableError" xml:space="preserve"><value>Failed to enable account.</value></data>
+  <data name="UsersResetPassword" xml:space="preserve"><value>Reset Password</value></data>
+  <data name="UsersResetPasswordTitle" xml:space="preserve"><value>Reset Password</value></data>
+  <data name="UsersNewPassword" xml:space="preserve"><value>New password</value></data>
+  <data name="UsersConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="UsersResetPasswordMismatch" xml:space="preserve"><value>Passwords do not match.</value></data>
+  <data name="UsersResetPasswordSuccess" xml:space="preserve"><value>Password has been reset.</value></data>
+  <data name="UsersResetPasswordError" xml:space="preserve"><value>Failed to reset password.</value></data>
+  <data name="UsersImpersonate" xml:space="preserve"><value>Impersonate</value></data>
+  <data name="UsersImpersonateConfirm" xml:space="preserve"><value>Log in as {0}? You will act as this user until you exit impersonation.</value></data>
+  <data name="UsersImpersonateError" xml:space="preserve"><value>Failed to start impersonation.</value></data>
+  <data name="UsersImpersonateBanner" xml:space="preserve"><value>Impersonating {0}</value></data>
+  <data name="UsersImpersonateExit" xml:space="preserve"><value>Exit Impersonation</value></data>
+  <data name="UsersCannotImpersonateSelf" xml:space="preserve"><value>You cannot impersonate yourself.</value></data>
 </root>
