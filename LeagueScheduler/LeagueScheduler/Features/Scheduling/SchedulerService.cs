@@ -1,6 +1,5 @@
 using LeagueScheduler.Shared.Scheduling;
 using Microsoft.Extensions.Options;
-using MatchType = LeagueScheduler.Shared.Scheduling.MatchType;
 
 namespace LeagueScheduler.Features.Scheduling
 {
@@ -32,7 +31,7 @@ namespace LeagueScheduler.Features.Scheduling
             var courts = request.Courts;
             var players = request.Players ?? [];
 
-            int playersPerMatch = season.MatchType == MatchType.Singles ? 2 : 4;
+            int playersPerMatch = season.MatchType?.MaxPlayersPerCourt ?? 4;
             var eligibleDates = BuildEligibleDates(season);
             int totalSlots = eligibleDates.Count * courts.Count * playersPerMatch;
 

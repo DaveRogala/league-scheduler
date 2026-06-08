@@ -15,7 +15,7 @@ namespace LeagueScheduler.Features.Scheduling
 
                 logger.LogInformation(
                     "Schedule compute requested for season {SeasonId} ({MatchType}, {PlayerCount} players)",
-                    request.Season.Id, request.Season.MatchType, request.Players.Count);
+                    request.Season.Id, request.Season.MatchType?.Name ?? "Unknown", request.Players.Count);
 
                 var result = await scheduler.ScheduleAsync(request);
 

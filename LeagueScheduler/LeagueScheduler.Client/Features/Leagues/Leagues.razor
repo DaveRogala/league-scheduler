@@ -26,14 +26,14 @@
     <HeaderContent>
         <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.Name))">@L["Name"]</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.Mode))">@L["Mode"]</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.MatchType))">@L["MatchType"]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.MatchType?.Name ?? string.Empty))">@L["MatchType"]</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortBy="@(new Func<LeagueDto, object>(x => x.RequireApprovalToJoin))">@L["RequireApproval"]</MudTableSortLabel></MudTh>
         <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="@L["Name"]">@context.Name</MudTd>
         <MudTd DataLabel="@L["Mode"]">@L[context.Mode.ToString()]</MudTd>
-        <MudTd DataLabel="@L["MatchType"]">@L[context.MatchType.ToString()]</MudTd>
+        <MudTd DataLabel="@L["MatchType"]">@context.MatchType?.Name</MudTd>
         <MudTd DataLabel="@L["RequireApproval"]">
             @if (context.RequireApprovalToJoin)
             {
@@ -69,7 +69,7 @@
             var s = _searchString.Trim();
             return l.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
                 || l.Mode.ToString().Contains(s, StringComparison.OrdinalIgnoreCase)
-                || l.MatchType.ToString().Contains(s, StringComparison.OrdinalIgnoreCase);
+                || (l.MatchType?.Name ?? string.Empty).Contains(s, StringComparison.OrdinalIgnoreCase);
         });
 
     protected override async Task OnInitializedAsync() => await RefreshAsync();

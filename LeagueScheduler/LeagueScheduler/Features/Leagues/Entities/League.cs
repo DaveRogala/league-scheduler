@@ -1,7 +1,7 @@
-using LeagueScheduler.Shared.Leagues;
 using LeagueScheduler.Features.Seasons.Entities;
 using LeagueScheduler.Infrastructure.Audit;
-using MatchType = LeagueScheduler.Shared.Scheduling.MatchType;
+using LeagueScheduler.Shared.Leagues;
+using ServerMatchType = LeagueScheduler.Features.MatchTypes.Entities.MatchType;
 
 namespace LeagueScheduler.Features.Leagues.Entities
 {
@@ -10,7 +10,8 @@ namespace LeagueScheduler.Features.Leagues.Entities
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public LeagueMode Mode { get; set; } = LeagueMode.Recreational;
-        public MatchType MatchType { get; set; } = MatchType.Doubles;
+        public Guid MatchTypeId { get; set; }
+        public ServerMatchType MatchType { get; set; } = null!;
         public bool RequireApprovalToJoin { get; set; }
 
         public List<Season> Seasons { get; set; } = [];

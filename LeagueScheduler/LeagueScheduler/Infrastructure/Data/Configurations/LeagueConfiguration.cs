@@ -12,7 +12,11 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
             e.Property(l => l.Id).HasDefaultValueSql("uuid_generate_v1mc()");
             e.Property(l => l.Name).IsRequired().HasMaxLength(200);
             e.Property(l => l.Mode).HasConversion<string>();
-            e.Property(l => l.MatchType).HasConversion<string>();
+
+            e.HasOne(l => l.MatchType)
+             .WithMany()
+             .HasForeignKey(l => l.MatchTypeId)
+             .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -8,6 +8,7 @@ using LeagueScheduler.Client.Features.Users;
 using LeagueScheduler.Client.Features.Leagues;
 using LeagueScheduler.Client.Features.Admin.Logs;
 using LeagueScheduler.Client.Features.Common;
+using LeagueScheduler.Client.Features.MatchTypes;
 using LeagueScheduler.Client.Features.Scheduling;
 using System.Globalization;
 using Microsoft.JSInterop;
@@ -46,6 +47,7 @@ builder.Services.AddScoped<AdminLogClient>();
 builder.Services.AddScoped<CourtHistoryClient>();
 builder.Services.AddScoped<PronounsClient>();
 builder.Services.AddScoped<CountryClient>();
+builder.Services.AddScoped<MatchTypeClient>();
 
 var host = builder.Build();
 

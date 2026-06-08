@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using LeagueScheduler.Shared.MatchTypes;
 
 namespace LeagueScheduler.Shared.Scheduling
 {
@@ -8,7 +7,7 @@ namespace LeagueScheduler.Shared.Scheduling
         public required Guid Id { get; init; }
         public Guid LeagueId { get; init; }
         public string Name { get; init; } = string.Empty;
-        public MatchType MatchType { get; init; } = MatchType.Doubles;
+        public MatchTypeDto? MatchType { get; init; }
         public DateTime StartDate { get; init; }
         public DateTime EndDate { get; init; }
         public List<DayOfWeek> DaysOfWeek { get; init; } = new();
