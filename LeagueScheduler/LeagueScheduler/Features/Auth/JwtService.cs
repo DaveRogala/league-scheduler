@@ -12,7 +12,12 @@ namespace LeagueScheduler.Features.Auth
 
         public JwtService(IConfiguration config) => _config = config;
 
-        public string GenerateToken(AppUser user)
+        public string GenerateToken(AppUser user) => BuildToken(user, impersonatorId: null);
+
+        public string GenerateImpersonationToken(AppUser targetUser, Guid impersonatorId) =>
+            BuildToken(targetUser, impersonatorId);
+
+        private string BuildToken(AppUser user, Guid? impersonatorId)
         {
             var secret = _config["Jwt:Secret"]
                 ?? throw new InvalidOperationException("Jwt:Secret is not configured.");
@@ -20,13 +25,16 @@ namespace LeagueScheduler.Features.Auth
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("displayName", user.DisplayName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Email, user.Email!),
+                new("displayName", user.DisplayName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
+
+            if (impersonatorId.HasValue)
+                claims.Add(new Claim("imp", impersonatorId.Value.ToString()));
 
             var expiryHours = _config.GetValue<int>("Jwt:ExpiryHours", 24);
             var token = new JwtSecurityToken(
