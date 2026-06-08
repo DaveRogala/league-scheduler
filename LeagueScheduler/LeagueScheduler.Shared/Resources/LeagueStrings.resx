@@ -39,8 +39,7 @@
   <data name="RequireApproval" xml:space="preserve"><value>Require Approval to Join</value></data>
   <data name="Recreational" xml:space="preserve"><value>Recreational</value></data>
   <data name="Competitive" xml:space="preserve"><value>Competitive</value></data>
-  <data name="Singles" xml:space="preserve"><value>Singles</value></data>
-  <data name="Doubles" xml:space="preserve"><value>Doubles</value></data>
+  <data name="MatchTypeRequired" xml:space="preserve"><value>Match type is required.</value></data>
   <data name="NoLeagues" xml:space="preserve"><value>No leagues yet. Create your first one.</value></data>
   <data name="ConfirmDeleteBody" xml:space="preserve"><value>Are you sure you want to delete this league? This cannot be undone.</value></data>
   <data name="NameRequired" xml:space="preserve"><value>Name is required.</value></data>

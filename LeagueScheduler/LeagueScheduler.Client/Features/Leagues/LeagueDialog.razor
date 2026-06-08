@@ -1,6 +1,7 @@
 @inject IStringLocalizer<CommonStrings> LC
 @inject IStringLocalizer<LeagueStrings> L
 @inject LeagueClient LeagueClient
+@inject MatchTypeClient MatchTypeClient
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -16,10 +17,17 @@
                 <MudSelectItem Value="LeagueMode.Recreational">@L["Recreational"]</MudSelectItem>
                 <MudSelectItem Value="LeagueMode.Competitive">@L["Competitive"]</MudSelectItem>
             </MudSelect>
-            <MudSelect @bind-Value="_model.MatchType" Label="@L["MatchType"]" Class="mb-3">
-                <MudSelectItem Value="MatchType.Singles">@L["Singles"]</MudSelectItem>
-                <MudSelectItem Value="MatchType.Doubles">@L["Doubles"]</MudSelectItem>
-            </MudSelect>
+            <MudAutocomplete T="MatchTypeDto"
+                             Value="_selectedMatchType"
+                             ValueChanged="OnMatchTypeChanged"
+                             SearchFunc="SearchMatchTypes"
+                             ToStringFunc="m => m?.Name ?? string.Empty"
+                             Label="@L["MatchType"]"
+                             Required="true"
+                             RequiredError="@L["MatchTypeRequired"]"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true"
+                             Class="mb-3" />
             <MudCheckBox @bind-Value="_model.RequireApprovalToJoin"
                          Label="@L["RequireApproval"]" />
         </MudForm>
@@ -40,6 +48,13 @@
     private MudForm _form = null!;
     private bool _isValid;
     private LeagueDto _model = new();
+    private List<MatchTypeDto> _matchTypes = [];
+    private MatchTypeDto? _selectedMatchType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _matchTypes = await MatchTypeClient.GetAllAsync() ?? [];
+    }
 
     protected override void OnParametersSet()
     {
@@ -49,10 +64,30 @@
                 Id = League.Id,
                 Name = League.Name,
                 Mode = League.Mode,
+                MatchTypeId = League.MatchTypeId,
                 MatchType = League.MatchType,
                 RequireApprovalToJoin = League.RequireApprovalToJoin
             }
             : new LeagueDto();
+
+        _selectedMatchType = _model.MatchTypeId != default
+            ? _matchTypes.FirstOrDefault(m => m.Id == _model.MatchTypeId)
+            : null;
+    }
+
+    private void OnMatchTypeChanged(MatchTypeDto? mt)
+    {
+        _selectedMatchType = mt;
+        _model.MatchTypeId = mt?.Id ?? default;
+        _model.MatchType = mt;
+    }
+
+    private Task<IEnumerable<MatchTypeDto>> SearchMatchTypes(string value, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<MatchTypeDto>>(_matchTypes);
+        return Task.FromResult(_matchTypes.Where(m =>
+            m.Name.Contains(value, StringComparison.OrdinalIgnoreCase)));
     }
 
     private async Task SaveAsync()

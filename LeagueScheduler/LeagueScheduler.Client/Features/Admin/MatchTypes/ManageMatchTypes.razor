@@ -1,0 +1,134 @@
+@page "/admin/match-types"
+@attribute [Authorize]
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<AdminStrings> LA
+@inject MatchTypeClient MatchTypeClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@LA["MatchTypesPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@LA["MatchTypesPageTitle"]</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">@LA["MatchTypesIntro"]</MudText>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="CreateAsync"
+           Class="mb-4">
+    @LA["MatchTypesAddButton"]
+</MudButton>
+
+<MudTable Items="@_matchTypes" Hover="true" Loading="_loading" Dense="true">
+    <HeaderContent>
+        <MudTh>@LA["MatchTypeName"]</MudTh>
+        <MudTh>@LA["MatchTypeDescription"]</MudTh>
+        <MudTh>@LA["MatchTypeMinPlayers"]</MudTh>
+        <MudTh>@LA["MatchTypeMaxPlayers"]</MudTh>
+        <MudTh>@LA["MatchTypeMustHaveEvenPlayers"]</MudTh>
+        <MudTh>@LA["MatchTypeSortOrder"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@LA["MatchTypeName"]">@context.Name</MudTd>
+        <MudTd DataLabel="@LA["MatchTypeDescription"]">
+            @if (!string.IsNullOrWhiteSpace(context.Description))
+            {
+                <MudTooltip Text="@context.Description" Arrow="true" Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
+                </MudTooltip>
+            }
+        </MudTd>
+        <MudTd DataLabel="@LA["MatchTypeMinPlayers"]">@context.MinPlayersPerCourt</MudTd>
+        <MudTd DataLabel="@LA["MatchTypeMaxPlayers"]">@context.MaxPlayersPerCourt</MudTd>
+        <MudTd DataLabel="@LA["MatchTypeMustHaveEvenPlayers"]">
+            @if (context.MustHaveEvenPlayers)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Outlined.Circle" Color="Color.Default" Size="Size.Small" />
+            }
+        </MudTd>
+        <MudTd DataLabel="@LA["MatchTypeSortOrder"]">@context.SortOrder</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                           title="@LC["Edit"]" OnClick="() => EditAsync(context)" />
+            @if (context.IsBuiltIn)
+            {
+                <MudTooltip Text="@LA["MatchTypeBuiltInTooltip"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Lock" Size="Size.Small"
+                                   Color="Color.Default" Disabled="true" />
+                </MudTooltip>
+            }
+            else
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                               Color="Color.Error" title="@LC["Delete"]"
+                               OnClick="() => DeleteAsync(context)" />
+            }
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2" Class="pa-4">@LA["MatchTypesNoItems"]</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    private List<MatchTypeDto> _matchTypes = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _matchTypes = await MatchTypeClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task CreateAsync()
+    {
+        var dialog = await DialogService.ShowAsync<MatchTypeEditDialog>(LA["MatchTypesAddButton"]);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: MatchTypeDto dto })
+        {
+            var response = await MatchTypeClient.CreateAsync(dto);
+            Snackbar.Add(
+                response.IsSuccessStatusCode ? LA["MatchTypeAddSuccess"] : LA["MatchTypeAddError"],
+                response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+            if (response.IsSuccessStatusCode) await RefreshAsync();
+        }
+    }
+
+    private async Task EditAsync(MatchTypeDto matchType)
+    {
+        var parameters = new DialogParameters<MatchTypeEditDialog> { { x => x.MatchType, matchType } };
+        var dialog = await DialogService.ShowAsync<MatchTypeEditDialog>(LC["Edit"], parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: MatchTypeDto dto })
+        {
+            var response = await MatchTypeClient.UpdateAsync(dto.Id, dto);
+            Snackbar.Add(
+                response.IsSuccessStatusCode ? LA["MatchTypeSaveSuccess"] : LA["MatchTypeSaveError"],
+                response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+            if (response.IsSuccessStatusCode) await RefreshAsync();
+        }
+    }
+
+    private async Task DeleteAsync(MatchTypeDto matchType)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LC["Confirm"],
+            LA["MatchTypeDeleteConfirm"],
+            yesText: LC["Delete"],
+            cancelText: LC["Cancel"]);
+        if (confirmed is not true) return;
+
+        var response = await MatchTypeClient.DeleteAsync(matchType.Id);
+        Snackbar.Add(
+            response.IsSuccessStatusCode ? LA["MatchTypeDeleteSuccess"] : LA["MatchTypeDeleteError"],
+            response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (response.IsSuccessStatusCode) await RefreshAsync();
+    }
+}

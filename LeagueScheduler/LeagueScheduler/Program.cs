@@ -3,6 +3,8 @@ using LeagueScheduler.Client.Features.Scheduling;
 using LeagueScheduler.Components;
 using LeagueScheduler.Features.Admin.Countries;
 using LeagueScheduler.Features.Admin.Logs;
+using LeagueScheduler.Features.Admin.MatchTypes;
+using LeagueScheduler.Features.MatchTypes;
 using LeagueScheduler.Features.Admin.Pronouns;
 using LeagueScheduler.Features.Auth;
 using LeagueScheduler.Features.Admin.TimeZones;
@@ -156,6 +158,8 @@ try
     app.MapLeagueEndpoints();
     app.MapCountryEndpoints();
     app.MapAdminCountryEndpoints();
+    app.MapMatchTypeEndpoints();
+    app.MapAdminMatchTypeEndpoints();
     app.MapCourtEndpoints();
     app.MapCourtHistoryEndpoints();
     app.MapLogEndpoints();

@@ -6,6 +6,7 @@ using LeagueScheduler.Features.Countries.Entities;
 using LeagueScheduler.Features.Courts.Entities;
 using LeagueScheduler.Features.Leagues.Entities;
 using LeagueScheduler.Features.Pronouns.Entities;
+using MatchTypeEntity = LeagueScheduler.Features.MatchTypes.Entities.MatchType;
 using LeagueScheduler.Features.SeasonPlayers.Entities;
 using LeagueScheduler.Features.Scheduling.Entities;
 using LeagueScheduler.Features.Seasons.Entities;
@@ -32,6 +33,7 @@ namespace LeagueScheduler.Infrastructure.Data
         public DbSet<Court> Courts => Set<Court>();
         public DbSet<CourtHistory> CourtHistories => Set<CourtHistory>();
         public DbSet<League> Leagues => Set<League>();
+        public DbSet<MatchTypeEntity> MatchTypes => Set<MatchTypeEntity>();
         public DbSet<LeaguePlayer> LeaguePlayers => Set<LeaguePlayer>();
         public DbSet<SeasonPlayer> SeasonPlayers => Set<SeasonPlayer>();
         public DbSet<Season> Seasons => Set<Season>();
