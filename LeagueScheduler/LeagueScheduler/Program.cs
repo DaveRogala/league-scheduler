@@ -1,9 +1,13 @@
 using MudBlazor.Services;
 using LeagueScheduler.Client.Features.Scheduling;
 using LeagueScheduler.Components;
+using LeagueScheduler.Features.Admin.Countries;
 using LeagueScheduler.Features.Admin.Logs;
+using LeagueScheduler.Features.Admin.Pronouns;
 using LeagueScheduler.Features.Auth;
 using LeagueScheduler.Features.Admin.TimeZones;
+using LeagueScheduler.Features.Countries;
+using LeagueScheduler.Features.Pronouns;
 using LeagueScheduler.Features.Users;
 using LeagueScheduler.Features.Courts;
 using LeagueScheduler.Features.Leagues;
@@ -146,8 +150,12 @@ try
     app.MapSchedulingEndpoints();
     app.MapAuthEndpoints();
     app.MapUserProfileEndpoints();
+    app.MapPronounsEndpoints();
+    app.MapAdminPronounsEndpoints();
     app.MapTimeZoneEndpoints();
     app.MapLeagueEndpoints();
+    app.MapCountryEndpoints();
+    app.MapAdminCountryEndpoints();
     app.MapCourtEndpoints();
     app.MapCourtHistoryEndpoints();
     app.MapLogEndpoints();

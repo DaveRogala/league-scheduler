@@ -17,8 +17,17 @@ namespace LeagueScheduler.Infrastructure.Data.Configurations
             e.Property(a => a.AdminArea).HasMaxLength(100);
             e.Property(a => a.SubAdminArea).HasMaxLength(100);
             e.Property(a => a.PostalCode).HasMaxLength(20);
-            e.Property(a => a.CountryCode).HasMaxLength(2);
             e.Property(a => a.VisibleFields).HasConversion<int>();
+
+            e.HasOne(a => a.Country)
+             .WithMany()
+             .HasForeignKey(a => a.CountryId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(a => a.AdminAreaRegion)
+             .WithMany()
+             .HasForeignKey(a => a.AdminAreaId)
+             .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

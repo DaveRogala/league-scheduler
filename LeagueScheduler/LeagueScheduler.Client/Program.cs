@@ -7,6 +7,7 @@ using LeagueScheduler.Client.Features.Admin.TimeZones;
 using LeagueScheduler.Client.Features.Users;
 using LeagueScheduler.Client.Features.Leagues;
 using LeagueScheduler.Client.Features.Admin.Logs;
+using LeagueScheduler.Client.Features.Common;
 using LeagueScheduler.Client.Features.Scheduling;
 using System.Globalization;
 using Microsoft.JSInterop;
@@ -43,6 +44,8 @@ builder.Services.AddScoped<UserProfileClient>();
 builder.Services.AddScoped<TimeZoneClient>();
 builder.Services.AddScoped<AdminLogClient>();
 builder.Services.AddScoped<CourtHistoryClient>();
+builder.Services.AddScoped<PronounsClient>();
+builder.Services.AddScoped<CountryClient>();
 
 var host = builder.Build();
 

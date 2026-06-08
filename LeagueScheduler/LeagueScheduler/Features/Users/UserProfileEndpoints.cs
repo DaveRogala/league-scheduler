@@ -26,8 +26,8 @@ namespace LeagueScheduler.Features.Users
                 user.MiddleName = string.IsNullOrWhiteSpace(dto.MiddleName) ? null : dto.MiddleName.Trim();
                 user.LastName = dto.LastName.Trim();
                 user.DisplayName = dto.DisplayName.Trim();
-                user.Pronouns = dto.Pronouns;
-                user.PronounsCustom = dto.Pronouns == Pronouns.Other
+                user.PronounsId = dto.PronounsId;
+                user.PronounsCustom = dto.PronounsId is null
                     ? dto.PronounsCustom?.Trim()
                     : null;
                 user.PreferredTimeZone = string.IsNullOrWhiteSpace(dto.PreferredTimeZone)
@@ -50,7 +50,7 @@ namespace LeagueScheduler.Features.Users
             MiddleName = user.MiddleName,
             LastName = user.LastName,
             DisplayName = user.DisplayName,
-            Pronouns = user.Pronouns,
+            PronounsId = user.PronounsId,
             PronounsCustom = user.PronounsCustom,
             PreferredTimeZone = user.PreferredTimeZone
         };

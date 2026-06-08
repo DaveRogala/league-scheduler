@@ -1,0 +1,133 @@
+@page "/admin/pronouns"
+@attribute [Authorize]
+@inject PronounsClient PronounsClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<AdminStrings> L
+
+<PageTitle>@L["PronounsPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@L["PronounsPageTitle"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-4">@L["PronounsIntro"]</MudText>
+
+<MudStack Row="true" AlignItems="AlignItems.End" Class="mb-4" Style="max-width:500px">
+    <MudTextField @bind-Value="_newLabel"
+                  Label="@L["PronounsAddLabel"]"
+                  Immediate="true"
+                  Style="flex:1"
+                  OnKeyDown="OnKeyDownAsync" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               Disabled="string.IsNullOrWhiteSpace(_newLabel) || _saving"
+               OnClick="AddAsync">
+        @L["PronounsAddButton"]
+    </MudButton>
+</MudStack>
+
+<MudTable Items="_pronouns" Hover="true" Dense="true" Loading="_loading" Style="max-width:500px">
+    <HeaderContent>
+        <MudTh>Pronoun Set</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Label</MudTd>
+        <MudTd Style="text-align:right">
+            @if (context.IsBuiltIn)
+            {
+                <MudTooltip Text="@L["PronounsBuiltInTooltip"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Lock"
+                                   Size="Size.Small" Disabled="true" />
+                </MudTooltip>
+            }
+            else
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small" Color="Color.Error"
+                               OnClick="() => DeleteAsync(context)" />
+            }
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No pronoun sets found.</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+    private List<SupportedPronounsDto> _pronouns = [];
+    private bool _loading = true;
+    private bool _saving;
+    private string _newLabel = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        _pronouns = await PronounsClient.GetAllAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_newLabel))
+            await AddAsync();
+    }
+
+    private async Task AddAsync()
+    {
+        var label = _newLabel.Trim();
+        if (string.IsNullOrWhiteSpace(label)) return;
+
+        // Warn before adding "It/Its" — check if any pronoun token is "it" or "its".
+        if (IsItIts(label))
+        {
+            var confirmed = await DialogService.ShowMessageBoxAsync(
+                L["PronounsItItsWarningTitle"],
+                L["PronounsItItsWarningBody"],
+                yesText: L["PronounsItItsAcknowledge"],
+                cancelText: "Cancel");
+            if (confirmed is not true) return;
+        }
+
+        _saving = true;
+        try
+        {
+            var resp = await PronounsClient.AddAsync(new SupportedPronounsDto { Label = label });
+            if (resp.IsSuccessStatusCode)
+            {
+                _newLabel = string.Empty;
+                Snackbar.Add(L["PronounsAddSuccess"], Severity.Success);
+                await RefreshAsync();
+            }
+            else
+            {
+                Snackbar.Add(L["PronounsAddError"], Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task DeleteAsync(SupportedPronounsDto pronoun)
+    {
+        var resp = await PronounsClient.DeleteAsync(pronoun.Id);
+        if (resp.IsSuccessStatusCode)
+        {
+            Snackbar.Add(L["PronounsDeleteSuccess"], Severity.Success);
+            await RefreshAsync();
+        }
+        else
+        {
+            Snackbar.Add(L["PronounsDeleteError"], Severity.Error);
+        }
+    }
+
+    // Match if any slash-delimited token, trimmed, is "it" or "its" (case-insensitive).
+    private static bool IsItIts(string label)
+    {
+        var tokens = label.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return tokens.Any(t => t.Equals("it", StringComparison.OrdinalIgnoreCase)
+                            || t.Equals("its", StringComparison.OrdinalIgnoreCase));
+    }
+}

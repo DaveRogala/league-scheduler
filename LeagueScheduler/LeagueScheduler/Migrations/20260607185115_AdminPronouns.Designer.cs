@@ -3,6 +3,7 @@ using System;
 using LeagueScheduler.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeagueScheduler.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260607185115_AdminPronouns")]
+    partial class AdminPronouns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,11 +195,9 @@ namespace LeagueScheduler.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("AdminAreaId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CountryId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("CountryCode")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
 
                     b.Property<string>("Line1")
                         .HasMaxLength(200)
@@ -227,112 +228,7 @@ namespace LeagueScheduler.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminAreaId");
-
-                    b.HasIndex("CountryId");
-
                     b.ToTable("Addresses");
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.Country", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("uuid_generate_v1mc()");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
-
-                    b.Property<bool>("DisplayRegion2")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsBuiltIn")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Region1Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<bool>("Region1UseList")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Region2Name")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Countries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("4b6f3f9e-0001-4000-a000-000000000001"),
-                            Code = "US",
-                            DisplayRegion2 = false,
-                            IsBuiltIn = true,
-                            Name = "United States",
-                            Region1Name = "State",
-                            Region1UseList = true,
-                            SortOrder = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("4b6f3f9e-0001-4000-a000-000000000002"),
-                            Code = "CA",
-                            DisplayRegion2 = false,
-                            IsBuiltIn = true,
-                            Name = "Canada",
-                            Region1Name = "Province",
-                            Region1UseList = true,
-                            SortOrder = 2
-                        });
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.CountryRegion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("uuid_generate_v1mc()");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<Guid>("CountryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CountryId", "Code")
-                        .IsUnique();
-
-                    b.ToTable("CountryRegions");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>
@@ -941,34 +837,6 @@ namespace LeagueScheduler.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LeagueScheduler.Features.Common.Entities.Address", b =>
-                {
-                    b.HasOne("LeagueScheduler.Features.Countries.Entities.CountryRegion", "AdminAreaRegion")
-                        .WithMany()
-                        .HasForeignKey("AdminAreaId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("LeagueScheduler.Features.Countries.Entities.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("AdminAreaRegion");
-
-                    b.Navigation("Country");
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.CountryRegion", b =>
-                {
-                    b.HasOne("LeagueScheduler.Features.Countries.Entities.Country", "Country")
-                        .WithMany("Regions")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-                });
-
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>
                 {
                     b.HasOne("LeagueScheduler.Features.Common.Entities.Address", "Address")
@@ -1130,11 +998,6 @@ namespace LeagueScheduler.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LeagueScheduler.Features.Countries.Entities.Country", b =>
-                {
-                    b.Navigation("Regions");
                 });
 
             modelBuilder.Entity("LeagueScheduler.Features.Courts.Entities.Court", b =>

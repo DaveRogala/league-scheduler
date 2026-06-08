@@ -3,6 +3,7 @@
 @inject IStringLocalizer<ProfileStrings> L
 @inject IStringLocalizer<CommonStrings> LC
 @inject UserProfileClient ProfileClient
+@inject PronounsClient PronounsClient
 @inject TimeZoneClient TzClient
 @inject ISnackbar Snackbar
 
@@ -48,17 +49,19 @@ else
                                       Immediate="true"
                                       Class="mb-3" />
 
-                        <MudSelect @bind-Value="_model.Pronouns"
+                        <MudSelect @bind-Value="_pronounsValue"
                                    Label="@L["Pronouns"]"
                                    Clearable="true"
                                    Class="mb-3">
-                            <MudSelectItem Value="@((Pronouns?)null)">@L["PronounsNotSpecified"]</MudSelectItem>
-                            <MudSelectItem Value="@((Pronouns?)Pronouns.HisHim)">@L["PronounsHisHim"]</MudSelectItem>
-                            <MudSelectItem Value="@((Pronouns?)Pronouns.HerHers)">@L["PronounsHerHers"]</MudSelectItem>
-                            <MudSelectItem Value="@((Pronouns?)Pronouns.Other)">@L["PronounsOther"]</MudSelectItem>
+                            <MudSelectItem Value="@((string?)null)">@L["PronounsNotSpecified"]</MudSelectItem>
+                            @foreach (var p in _availablePronouns)
+                            {
+                                <MudSelectItem Value="@p.Id.ToString()">@p.Label</MudSelectItem>
+                            }
+                            <MudSelectItem Value="@("other")">@L["PronounsSelfDescribe"]</MudSelectItem>
                         </MudSelect>
 
-                        @if (_model.Pronouns == Pronouns.Other)
+                        @if (_pronounsValue == "other")
                         {
                             <MudTextField @bind-Value="_model.PronounsCustom"
                                           Label="@L["PronounsCustom"]"
@@ -66,16 +69,16 @@ else
                                           Class="mb-3" />
                         }
 
-                        <MudSelect @bind-Value="_model.PreferredTimeZone"
-                                   Label="@L["PreferredTimeZone"]"
-                                   Clearable="true"
-                                   Class="mb-3">
-                            <MudSelectItem Value="@((string?)null)">—</MudSelectItem>
-                            @foreach (var tz in _timeZones)
-                            {
-                                <MudSelectItem Value="@tz.Id">@FormatTz(tz)</MudSelectItem>
-                            }
-                        </MudSelect>
+                        <MudAutocomplete T="SupportedTimeZoneDto"
+                                         Value="_selectedTz"
+                                         ValueChanged="@((SupportedTimeZoneDto tz) => _selectedTz = tz)"
+                                         SearchFunc="SearchTimeZones"
+                                         ToStringFunc="tz => tz is null ? string.Empty : FormatTz(tz)"
+                                         Label="@L["PreferredTimeZone"]"
+                                         Clearable="true"
+                                         ResetValueOnEmptyText="true"
+                                         Class="mb-3" />
+
                     </MudCardContent>
                     <MudCardActions Class="px-4 pb-4">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary"
@@ -100,13 +103,24 @@ else
     private bool _loading = true;
     private bool _saving;
     private UserProfileModel _model = new();
+    private List<SupportedPronounsDto> _availablePronouns = [];
     private List<SupportedTimeZoneDto> _timeZones = [];
+    private SupportedTimeZoneDto? _selectedTz;
+
+    // null = not specified, "other" = self-describe, Guid.ToString() = selected set
+    private string? _pronounsValue;
 
     protected override async Task OnInitializedAsync()
     {
         var tzTask = TzClient.GetEnabledAsync();
+        var pronounsTask = PronounsClient.GetAllAsync();
         var dto = await ProfileClient.GetAsync();
+
+        _timeZones = await tzTask ?? [];
+        _availablePronouns = await pronounsTask ?? [];
+
         if (dto is not null)
+        {
             _model = new UserProfileModel
             {
                 Email = dto.Email,
@@ -114,11 +128,19 @@ else
                 MiddleName = dto.MiddleName,
                 LastName = dto.LastName,
                 DisplayName = dto.DisplayName,
-                Pronouns = dto.Pronouns,
-                PronounsCustom = dto.PronounsCustom,
-                PreferredTimeZone = dto.PreferredTimeZone
+                PronounsCustom = dto.PronounsCustom
             };
-        _timeZones = await tzTask ?? [];
+
+            if (dto.PronounsId.HasValue)
+                _pronounsValue = dto.PronounsId.Value.ToString();
+            else if (!string.IsNullOrWhiteSpace(dto.PronounsCustom))
+                _pronounsValue = "other";
+            else
+                _pronounsValue = null;
+
+            _selectedTz = _timeZones.FirstOrDefault(tz => tz.Id == dto.PreferredTimeZone);
+        }
+
         _loading = false;
     }
 
@@ -130,6 +152,14 @@ else
         _saving = true;
         try
         {
+            Guid? pronounsId = _pronounsValue is null or "" or "other"
+                ? null
+                : Guid.TryParse(_pronounsValue, out var g) ? g : null;
+
+            string? pronounsCustom = _pronounsValue == "other"
+                ? _model.PronounsCustom?.Trim()
+                : null;
+
             var response = await ProfileClient.UpdateAsync(new UserProfileDto
             {
                 Email = _model.Email,
@@ -137,9 +167,9 @@ else
                 MiddleName = _model.MiddleName,
                 LastName = _model.LastName,
                 DisplayName = _model.DisplayName,
-                Pronouns = _model.Pronouns,
-                PronounsCustom = _model.PronounsCustom,
-                PreferredTimeZone = _model.PreferredTimeZone
+                PronounsId = pronounsId,
+                PronounsCustom = pronounsCustom,
+                PreferredTimeZone = _selectedTz?.Id
             });
 
             Snackbar.Add(
@@ -150,6 +180,16 @@ else
         {
             _saving = false;
         }
+    }
+
+    private Task<IEnumerable<SupportedTimeZoneDto>> SearchTimeZones(string value, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<SupportedTimeZoneDto>>(_timeZones);
+        return Task.FromResult(
+            _timeZones.Where(tz =>
+                tz.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                tz.Id.Contains(value, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string FormatTz(SupportedTimeZoneDto tz)
@@ -167,8 +207,6 @@ else
         public string? MiddleName { get; set; }
         public string LastName { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
-        public Pronouns? Pronouns { get; set; }
         public string? PronounsCustom { get; set; }
-        public string? PreferredTimeZone { get; set; }
     }
 }
