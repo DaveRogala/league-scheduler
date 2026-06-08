@@ -39,5 +39,4 @@
   <data name="SubAdminArea" xml:space="preserve"><value>County / District</value></data>
   <data name="PostalCode" xml:space="preserve"><value>Postal Code</value></data>
   <data name="Country" xml:space="preserve"><value>Country</value></data>
-  <data name="ConfigureFields" xml:space="preserve"><value>Configure visible fields</value></data>
 </root>
