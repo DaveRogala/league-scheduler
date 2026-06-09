@@ -1,0 +1,246 @@
+@page "/admin/users"
+@attribute [Authorize]
+@inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<AdminStrings> LA
+@inject AdminUserClient UserClient
+@inject AppAuthStateProvider AuthState
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@LA["UsersPageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@LA["UsersPageTitle"]</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">@LA["UsersIntro"]</MudText>
+
+<MudTextField @bind-Value="_search"
+              Label="@LA["UsersSearch"]"
+              Adornment="Adornment.Start"
+              AdornmentIcon="@Icons.Material.Filled.Search"
+              Variant="Variant.Outlined"
+              Class="mb-4"
+              DebounceInterval="300"
+              OnDebounceIntervalElapsed="() => RefreshAsync()"
+              Immediate="true" />
+
+<MudTable Items="@_users" Hover="true" Loading="_loading" Dense="true">
+    <HeaderContent>
+        <MudTh>@LA["UsersColEmail"]</MudTh>
+        <MudTh>@LA["UsersColDisplayName"]</MudTh>
+        <MudTh>@LA["UsersColStatus"]</MudTh>
+        <MudTh>@LA["UsersColRoles"]</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@LA["UsersColEmail"]">@context.Email</MudTd>
+        <MudTd DataLabel="@LA["UsersColDisplayName"]">@context.DisplayName</MudTd>
+        <MudTd DataLabel="@LA["UsersColStatus"]">
+            @if (context.IsDisabled)
+            {
+                <MudChip T="string" Color="Color.Error" Size="Size.Small">@LA["UsersStatusDisabled"]</MudChip>
+            }
+            else
+            {
+                <MudChip T="string" Color="Color.Success" Size="Size.Small">@LA["UsersStatusActive"]</MudChip>
+            }
+        </MudTd>
+        <MudTd DataLabel="@LA["UsersColRoles"]">
+            @foreach (var role in context.Roles)
+            {
+                <MudChip T="string" Size="Size.Small" Class="mr-1">@role</MudChip>
+            }
+        </MudTd>
+        <MudTd>
+            <MudTooltip Text="@LA["UsersResetPassword"]">
+                <MudIconButton Icon="@Icons.Material.Filled.LockReset" Size="Size.Small"
+                               OnClick="() => ResetPasswordAsync(context)" />
+            </MudTooltip>
+            @if (context.IsDisabled)
+            {
+                <MudTooltip Text="@LA["UsersEnable"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.LockOpen" Size="Size.Small"
+                                   Color="Color.Success"
+                                   OnClick="() => EnableAsync(context)" />
+                </MudTooltip>
+            }
+            else
+            {
+                <MudTooltip Text="@LA["UsersDisable"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Block" Size="Size.Small"
+                                   Color="Color.Warning"
+                                   OnClick="() => DisableAsync(context)" />
+                </MudTooltip>
+            }
+            <MudTooltip Text="@LA["UsersImpersonate"]">
+                <MudIconButton Icon="@Icons.Material.Filled.SupervisedUserCircle" Size="Size.Small"
+                               Color="Color.Info"
+                               Disabled="@context.IsDisabled"
+                               OnClick="() => ImpersonateAsync(context)" />
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText Typo="Typo.body2" Class="pa-4">@LA["UsersNoItems"]</MudText>
+    </NoRecordsContent>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@* Reset Password Dialog *@
+<MudDialog @bind-Visible="_resetDialogOpen">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@LA["UsersResetPasswordTitle"]: @_selectedUser?.DisplayName</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="_newPassword"
+                      Label="@LA["UsersNewPassword"]"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+        <MudTextField @bind-Value="_confirmPassword"
+                      Label="@LA["UsersConfirmPassword"]"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined" />
+        @if (_resetError is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3">@_resetError</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseResetDialog">@LC["Cancel"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="ConfirmResetPasswordAsync" Disabled="_busy">
+            @if (_busy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @LC["Save"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<AdminUserDto> _users = [];
+    private bool _loading = true;
+    private string? _search;
+
+    private bool _resetDialogOpen;
+    private AdminUserDto? _selectedUser;
+    private string _newPassword = string.Empty;
+    private string _confirmPassword = string.Empty;
+    private string? _resetError;
+    private bool _busy;
+
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        var result = await UserClient.GetUsersAsync(_search);
+        _users = result?.Users.ToList() ?? [];
+        _loading = false;
+    }
+
+    private void ResetPasswordAsync(AdminUserDto user)
+    {
+        _selectedUser = user;
+        _newPassword = string.Empty;
+        _confirmPassword = string.Empty;
+        _resetError = null;
+        _resetDialogOpen = true;
+    }
+
+    private void CloseResetDialog()
+    {
+        _resetDialogOpen = false;
+        _selectedUser = null;
+    }
+
+    private async Task ConfirmResetPasswordAsync()
+    {
+        if (_selectedUser is null) return;
+
+        if (_newPassword != _confirmPassword)
+        {
+            _resetError = LA["UsersResetPasswordMismatch"];
+            return;
+        }
+
+        _busy = true;
+        _resetError = null;
+        try
+        {
+            var response = await UserClient.ResetPasswordAsync(
+                _selectedUser.Id,
+                new AdminResetPasswordDto(_newPassword, _confirmPassword));
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add(LA["UsersResetPasswordSuccess"], Severity.Success);
+                CloseResetDialog();
+            }
+            else
+            {
+                _resetError = LA["UsersResetPasswordError"];
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task DisableAsync(AdminUserDto user)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LC["Confirm"],
+            LA["UsersDisableConfirm"],
+            yesText: LA["UsersDisable"],
+            cancelText: LC["Cancel"]);
+        if (confirmed is not true) return;
+
+        var response = await UserClient.DisableAsync(user.Id);
+        Snackbar.Add(
+            response.IsSuccessStatusCode ? LA["UsersDisableSuccess"] : LA["UsersDisableError"],
+            response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (response.IsSuccessStatusCode) await RefreshAsync();
+    }
+
+    private async Task EnableAsync(AdminUserDto user)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LC["Confirm"],
+            LA["UsersEnableConfirm"],
+            yesText: LA["UsersEnable"],
+            cancelText: LC["Cancel"]);
+        if (confirmed is not true) return;
+
+        var response = await UserClient.EnableAsync(user.Id);
+        Snackbar.Add(
+            response.IsSuccessStatusCode ? LA["UsersEnableSuccess"] : LA["UsersEnableError"],
+            response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        if (response.IsSuccessStatusCode) await RefreshAsync();
+    }
+
+    private async Task ImpersonateAsync(AdminUserDto user)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            LA["UsersImpersonate"],
+            string.Format(LA["UsersImpersonateConfirm"], user.DisplayName),
+            yesText: LA["UsersImpersonate"],
+            cancelText: LC["Cancel"]);
+        if (confirmed is not true) return;
+
+        var result = await UserClient.ImpersonateAsync(user.Id);
+        if (result?.Success == true && result.Token is not null)
+        {
+            await AuthState.BeginImpersonation(result.Token);
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            Snackbar.Add(LA["UsersImpersonateError"], Severity.Error);
+        }
+    }
+}

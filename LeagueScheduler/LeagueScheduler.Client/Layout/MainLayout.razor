@@ -1,8 +1,10 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject AppAuthStateProvider AuthState
 @inject NavigationManager Nav
 @inject IStringLocalizer<AuthStrings> L
 @inject IStringLocalizer<CommonStrings> LC
+@inject IStringLocalizer<AdminStrings> LA
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -43,6 +45,20 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent Class="pt-16 pa-4">
+        @if (AuthState.IsImpersonating)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mb-4"
+                      ContentAlignment="HorizontalAlignment.Center"
+                      Icon="@Icons.Material.Filled.SupervisedUserCircle">
+                <MudText Typo="Typo.body1" Class="d-inline mr-3">
+                    @string.Format(LA["UsersImpersonateBanner"], AuthState.ImpersonatedDisplayName)
+                </MudText>
+                <MudButton Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small"
+                           OnClick="ExitImpersonationAsync">
+                    @LA["UsersImpersonateExit"]
+                </MudButton>
+            </MudAlert>
+        }
         @Body
     </MudMainContent>
 </MudLayout>
@@ -64,6 +80,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        AuthState.AuthenticationStateChanged += OnAuthStateChanged;
 
         _theme = new()
         {
@@ -88,6 +105,18 @@
         await AuthState.NotifyUserLoggedOut();
         Nav.NavigateTo("/login");
     }
+
+    private async Task ExitImpersonationAsync()
+    {
+        await AuthState.EndImpersonation();
+        Nav.NavigateTo("/admin/users");
+    }
+
+    private void OnAuthStateChanged(Task<AuthenticationState> _) =>
+        InvokeAsync(StateHasChanged);
+
+    void IDisposable.Dispose() =>
+        AuthState.AuthenticationStateChanged -= OnAuthStateChanged;
 
     private readonly PaletteLight _lightPalette = new()
     {

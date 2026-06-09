@@ -4,6 +4,7 @@ using LeagueScheduler.Components;
 using LeagueScheduler.Features.Admin.Countries;
 using LeagueScheduler.Features.Admin.Logs;
 using LeagueScheduler.Features.Admin.MatchTypes;
+using LeagueScheduler.Features.Admin.Users;
 using LeagueScheduler.Features.MatchTypes;
 using LeagueScheduler.Features.Admin.Pronouns;
 using LeagueScheduler.Features.Auth;
@@ -165,6 +166,7 @@ try
     app.MapCourtHistoryEndpoints();
     app.MapLogEndpoints();
     app.MapPlayerProfileEndpoints();
+    app.MapAdminUserEndpoints();
 
     Log.Information("Application starting");
     app.Run();

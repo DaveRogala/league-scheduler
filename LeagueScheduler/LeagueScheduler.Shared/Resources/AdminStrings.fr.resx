@@ -59,4 +59,40 @@
   <data name="LogsProperties" xml:space="preserve"><value>Propriétés</value></data>
   <data name="LogsException" xml:space="preserve"><value>Exception</value></data>
   <data name="LogsNavLink" xml:space="preserve"><value>Journaux</value></data>
+  <data name="PronounsNavLink" xml:space="preserve"><value>Pronoms</value></data>
+  <data name="CountriesNavLink" xml:space="preserve"><value>Pays</value></data>
+  <data name="MatchTypesNavLink" xml:space="preserve"><value>Types de match</value></data>
+
+  <data name="UsersNavLink" xml:space="preserve"><value>Utilisateurs</value></data>
+  <data name="UsersPageTitle" xml:space="preserve"><value>Gestion des utilisateurs</value></data>
+  <data name="UsersIntro" xml:space="preserve"><value>Consultez et gérez les comptes — réinitialisez les mots de passe, désactivez ou réactivez des comptes, et impersonnez des utilisateurs pour le débogage.</value></data>
+  <data name="UsersSearch" xml:space="preserve"><value>Rechercher par courriel ou nom d'affichage…</value></data>
+  <data name="UsersNoItems" xml:space="preserve"><value>Aucun utilisateur trouvé.</value></data>
+  <data name="UsersColEmail" xml:space="preserve"><value>Courriel</value></data>
+  <data name="UsersColDisplayName" xml:space="preserve"><value>Nom affiché</value></data>
+  <data name="UsersColStatus" xml:space="preserve"><value>Statut</value></data>
+  <data name="UsersColRoles" xml:space="preserve"><value>Rôles</value></data>
+  <data name="UsersStatusActive" xml:space="preserve"><value>Actif</value></data>
+  <data name="UsersStatusDisabled" xml:space="preserve"><value>Désactivé</value></data>
+  <data name="UsersDisable" xml:space="preserve"><value>Désactiver</value></data>
+  <data name="UsersEnable" xml:space="preserve"><value>Activer</value></data>
+  <data name="UsersDisableConfirm" xml:space="preserve"><value>Désactiver ce compte ? L'utilisateur ne pourra plus se connecter.</value></data>
+  <data name="UsersEnableConfirm" xml:space="preserve"><value>Réactiver ce compte ?</value></data>
+  <data name="UsersDisableSuccess" xml:space="preserve"><value>Compte désactivé.</value></data>
+  <data name="UsersDisableError" xml:space="preserve"><value>Échec de la désactivation du compte.</value></data>
+  <data name="UsersEnableSuccess" xml:space="preserve"><value>Compte activé.</value></data>
+  <data name="UsersEnableError" xml:space="preserve"><value>Échec de la réactivation du compte.</value></data>
+  <data name="UsersResetPassword" xml:space="preserve"><value>Réinitialiser le mot de passe</value></data>
+  <data name="UsersResetPasswordTitle" xml:space="preserve"><value>Réinitialiser le mot de passe</value></data>
+  <data name="UsersNewPassword" xml:space="preserve"><value>Nouveau mot de passe</value></data>
+  <data name="UsersConfirmPassword" xml:space="preserve"><value>Confirmer le mot de passe</value></data>
+  <data name="UsersResetPasswordMismatch" xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
+  <data name="UsersResetPasswordSuccess" xml:space="preserve"><value>Mot de passe réinitialisé.</value></data>
+  <data name="UsersResetPasswordError" xml:space="preserve"><value>Échec de la réinitialisation du mot de passe.</value></data>
+  <data name="UsersImpersonate" xml:space="preserve"><value>Impersonnifier</value></data>
+  <data name="UsersImpersonateConfirm" xml:space="preserve"><value>Se connecter en tant que {0} ? Vous agirez comme cet utilisateur jusqu'à la fin de l'impersonnification.</value></data>
+  <data name="UsersImpersonateError" xml:space="preserve"><value>Échec du démarrage de l'impersonnification.</value></data>
+  <data name="UsersImpersonateBanner" xml:space="preserve"><value>Impersonnification de {0}</value></data>
+  <data name="UsersImpersonateExit" xml:space="preserve"><value>Quitter l'impersonnification</value></data>
+  <data name="UsersCannotImpersonateSelf" xml:space="preserve"><value>Vous ne pouvez pas vous impersonnifier vous-même.</value></data>
 </root>
