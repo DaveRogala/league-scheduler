@@ -11,6 +11,7 @@ using LeagueScheduler.Features.Admin.TimeZones;
 using LeagueScheduler.Features.Countries;
 using LeagueScheduler.Features.Pronouns;
 using LeagueScheduler.Features.Users;
+using LeagueScheduler.Features.Players;
 using LeagueScheduler.Features.Courts;
 using LeagueScheduler.Features.Leagues;
 using LeagueScheduler.Features.Auth.Entities;
@@ -163,6 +164,7 @@ try
     app.MapCourtEndpoints();
     app.MapCourtHistoryEndpoints();
     app.MapLogEndpoints();
+    app.MapPlayerProfileEndpoints();
 
     Log.Information("Application starting");
     app.Run();
