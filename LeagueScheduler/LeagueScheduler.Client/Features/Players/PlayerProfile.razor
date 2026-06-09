@@ -1,0 +1,265 @@
+@page "/player-profile"
+@attribute [Authorize]
+@inject IStringLocalizer<PlayerStrings> LP
+@inject IStringLocalizer<CommonStrings> LC
+@inject PlayerProfileClient PlayerClient
+@inject ISnackbar Snackbar
+
+<PageTitle>@LP["PageTitle"]</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">@LP["PageTitle"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-4">@LP["PageIntro"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="8" lg="6">
+            <MudExpansionPanels MultiExpansion="true">
+
+                @* ── Privacy & Visibility ── *@
+                <MudExpansionPanel Text="@LP["PrivacySectionTitle"]" Expanded="true">
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">@LP["PrivacyLevelLabel"]</MudText>
+                    <MudRadioGroup T="PrivacyLevel" @bind-Value="_model.PrivacyLevel" Class="mb-3">
+                        <MudRadio Value="PrivacyLevel.Public" Color="Color.Primary">
+                            <MudText Typo="Typo.body1">@LP["PrivacyLevelPublic"]</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@LP["PrivacyLevelPublicHint"]</MudText>
+                        </MudRadio>
+                        <MudRadio Value="PrivacyLevel.Restricted" Color="Color.Primary">
+                            <MudText Typo="Typo.body1">@LP["PrivacyLevelRestricted"]</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@LP["PrivacyLevelRestrictedHint"]</MudText>
+                        </MudRadio>
+                        <MudRadio Value="PrivacyLevel.Private" Color="Color.Primary">
+                            <MudText Typo="Typo.body1">@LP["PrivacyLevelPrivate"]</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@LP["PrivacyLevelPrivateHint"]</MudText>
+                        </MudRadio>
+                    </MudRadioGroup>
+                    <MudCheckBox @bind-Value="_model.ShowEmail" Label="@LP["ShowEmail"]" Color="Color.Primary" />
+                </MudExpansionPanel>
+
+                @* ── Contact ── *@
+                <MudExpansionPanel Text="@LP["ContactSectionTitle"]">
+                    <MudTextField @bind-Value="_model.PhoneNumber"
+                                  Label="@LP["PhoneNumber"]"
+                                  InputType="InputType.Telephone"
+                                  Variant="Variant.Outlined"
+                                  Class="mb-3" />
+                    <MudCheckBox @bind-Value="_model.ShowPhone" Label="@LP["ShowPhone"]" Color="Color.Primary" Class="mb-4" />
+
+                    <MudDivider Class="mb-4" />
+                    <MudText Typo="Typo.subtitle2" Class="mb-3">@LP["AddressSectionTitle"]</MudText>
+                    <AddressForm Value="_address" />
+                    <MudCheckBox @bind-Value="_model.ShowAddress" Label="@LP["ShowAddress"]" Color="Color.Primary" Class="mt-3" />
+                    <MudCheckBox @bind-Value="_model.ShowCityPostalOnly" Label="@LP["ShowCityPostalOnly"]" Color="Color.Primary"
+                                 Disabled="@(!_model.ShowAddress)" />
+                </MudExpansionPanel>
+
+                @* ── Identity ── *@
+                <MudExpansionPanel Text="@LP["IdentitySectionTitle"]">
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">@LP["IdentityNote"]</MudAlert>
+                    <MudSelect T="GenderIdentity?" @bind-Value="_model.Gender"
+                               Label="@LP["GenderLabel"]"
+                               Clearable="true"
+                               Variant="Variant.Outlined"
+                               Class="mb-3">
+                        <MudSelectItem T="GenderIdentity?" Value="@null">@LP["GenderNotSpecified"]</MudSelectItem>
+                        <MudSelectItem T="GenderIdentity?" Value="GenderIdentity.Male">@LP["GenderMale"]</MudSelectItem>
+                        <MudSelectItem T="GenderIdentity?" Value="GenderIdentity.Female">@LP["GenderFemale"]</MudSelectItem>
+                        <MudSelectItem T="GenderIdentity?" Value="GenderIdentity.NonBinary">@LP["GenderNonBinary"]</MudSelectItem>
+                        <MudSelectItem T="GenderIdentity?" Value="GenderIdentity.SelfDescribed">@LP["GenderSelfDescribed"]</MudSelectItem>
+                    </MudSelect>
+                    @if (_model.Gender == GenderIdentity.SelfDescribed)
+                    {
+                        <MudTextField @bind-Value="_model.GenderDescription"
+                                      Label="@LP["GenderDescription"]"
+                                      Variant="Variant.Outlined"
+                                      Immediate="true" />
+                    }
+                </MudExpansionPanel>
+
+                @* ── Tennis Ratings ── *@
+                <MudExpansionPanel Text="@LP["RatingsSectionTitle"]">
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">@LP["RatingsNote"]</MudAlert>
+
+                    <MudSelect T="decimal?" @bind-Value="_model.NtrpRating"
+                               Label="@LP["NtrpRating"]"
+                               HelperText="@LP["NtrpRatingHint"]"
+                               Clearable="true"
+                               Variant="Variant.Outlined"
+                               Class="mb-4">
+                        <MudSelectItem T="decimal?" Value="@null">@LP["NotSpecified"]</MudSelectItem>
+                        @foreach (var r in _ntrpValues)
+                        {
+                            <MudSelectItem T="decimal?" Value="@r">@r.ToString("F1")</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudNumericField T="decimal?" @bind-Value="_model.WtnSingles"
+                                     Label="@LP["WtnSingles"]"
+                                     HelperText="@LP["WtnSinglesHint"]"
+                                     Min="1m" Max="40m" Step="0.1m"
+                                     Variant="Variant.Outlined"
+                                     Class="mb-4" />
+
+                    <MudNumericField T="decimal?" @bind-Value="_model.WtnDoubles"
+                                     Label="@LP["WtnDoubles"]"
+                                     HelperText="@LP["WtnDoublesHint"]"
+                                     Min="1m" Max="40m" Step="0.1m"
+                                     Variant="Variant.Outlined"
+                                     Class="mb-4" />
+
+                    <MudNumericField T="decimal?" @bind-Value="_model.UtrRating"
+                                     Label="@LP["UtrRating"]"
+                                     HelperText="@LP["UtrRatingHint"]"
+                                     Min="1m" Max="17m" Step="0.01m"
+                                     Variant="Variant.Outlined" />
+                </MudExpansionPanel>
+
+                @* ── Playing Preferences ── *@
+                <MudExpansionPanel Text="@LP["PrefsSectionTitle"]">
+                    <MudSelect T="HandPreference?" @bind-Value="_model.HandPreference"
+                               Label="@LP["HandPreferenceLabel"]"
+                               Clearable="true"
+                               Variant="Variant.Outlined"
+                               Class="mb-3">
+                        <MudSelectItem T="HandPreference?" Value="@null">@LP["NotSpecified"]</MudSelectItem>
+                        <MudSelectItem T="HandPreference?" Value="HandPreference.Right">@LP["HandRight"]</MudSelectItem>
+                        <MudSelectItem T="HandPreference?" Value="HandPreference.Left">@LP["HandLeft"]</MudSelectItem>
+                        <MudSelectItem T="HandPreference?" Value="HandPreference.Both">@LP["HandBoth"]</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="CourtSide?" @bind-Value="_model.PreferredSide"
+                               Label="@LP["PreferredSideLabel"]"
+                               Clearable="true"
+                               Variant="Variant.Outlined"
+                               Class="mb-3">
+                        <MudSelectItem T="CourtSide?" Value="@null">@LP["NotSpecified"]</MudSelectItem>
+                        <MudSelectItem T="CourtSide?" Value="CourtSide.Ad">@LP["SideAd"]</MudSelectItem>
+                        <MudSelectItem T="CourtSide?" Value="CourtSide.Deuce">@LP["SideDeuce"]</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect T="CourtSurface?" @bind-Value="_model.PreferredSurface"
+                               Label="@LP["PreferredSurfaceLabel"]"
+                               Clearable="true"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem T="CourtSurface?" Value="@null">@LP["NotSpecified"]</MudSelectItem>
+                        <MudSelectItem T="CourtSurface?" Value="CourtSurface.Hard">@LP["SurfaceHard"]</MudSelectItem>
+                        <MudSelectItem T="CourtSurface?" Value="CourtSurface.Clay">@LP["SurfaceClay"]</MudSelectItem>
+                        <MudSelectItem T="CourtSurface?" Value="CourtSurface.Grass">@LP["SurfaceGrass"]</MudSelectItem>
+                    </MudSelect>
+                </MudExpansionPanel>
+
+            </MudExpansionPanels>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       FullWidth="true" Class="mt-4"
+                       OnClick="SaveAsync" Disabled="_saving">
+                @if (_saving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @LC["Save"]
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private bool _loading = true;
+    private bool _saving;
+    private PlayerProfileModel _model = new();
+    private AddressDto _address = new();
+
+    // NTRP goes 1.0–7.0 in 0.5 steps.
+    private static readonly decimal[] _ntrpValues =
+        Enumerable.Range(0, 13).Select(i => 1.0m + i * 0.5m).ToArray();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dto = await PlayerClient.GetAsync();
+        if (dto is not null)
+        {
+            _model = new PlayerProfileModel
+            {
+                PrivacyLevel = dto.PrivacyLevel,
+                ShowEmail = dto.ShowEmail,
+                PhoneNumber = dto.PhoneNumber,
+                ShowPhone = dto.ShowPhone,
+                ShowAddress = dto.ShowAddress,
+                ShowCityPostalOnly = dto.ShowCityPostalOnly,
+                Gender = dto.Gender,
+                GenderDescription = dto.GenderDescription,
+                NtrpRating = dto.NtrpRating,
+                WtnSingles = dto.WtnSingles,
+                WtnDoubles = dto.WtnDoubles,
+                UtrRating = dto.UtrRating,
+                HandPreference = dto.HandPreference,
+                PreferredSide = dto.PreferredSide,
+                PreferredSurface = dto.PreferredSurface
+            };
+
+            if (dto.Address is not null)
+                _address = dto.Address;
+        }
+
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        try
+        {
+            var dto = new PlayerProfileDto
+            {
+                PrivacyLevel = _model.PrivacyLevel,
+                ShowEmail = _model.ShowEmail,
+                PhoneNumber = _model.PhoneNumber,
+                ShowPhone = _model.ShowPhone,
+                Address = _address,
+                ShowAddress = _model.ShowAddress,
+                ShowCityPostalOnly = _model.ShowCityPostalOnly,
+                Gender = _model.Gender,
+                GenderDescription = _model.GenderDescription,
+                NtrpRating = _model.NtrpRating,
+                WtnSingles = _model.WtnSingles,
+                WtnDoubles = _model.WtnDoubles,
+                UtrRating = _model.UtrRating,
+                HandPreference = _model.HandPreference,
+                PreferredSide = _model.PreferredSide,
+                PreferredSurface = _model.PreferredSurface
+            };
+
+            var response = await PlayerClient.UpdateAsync(dto);
+            Snackbar.Add(
+                response.IsSuccessStatusCode ? LP["SaveSuccess"] : LP["SaveError"],
+                response.IsSuccessStatusCode ? Severity.Success : Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private class PlayerProfileModel
+    {
+        public PrivacyLevel PrivacyLevel { get; set; } = PrivacyLevel.Restricted;
+        public bool ShowEmail { get; set; }
+        public string? PhoneNumber { get; set; }
+        public bool ShowPhone { get; set; }
+        public bool ShowAddress { get; set; }
+        public bool ShowCityPostalOnly { get; set; }
+        public GenderIdentity? Gender { get; set; }
+        public string? GenderDescription { get; set; }
+        public decimal? NtrpRating { get; set; }
+        public decimal? WtnSingles { get; set; }
+        public decimal? WtnDoubles { get; set; }
+        public decimal? UtrRating { get; set; }
+        public HandPreference? HandPreference { get; set; }
+        public CourtSide? PreferredSide { get; set; }
+        public CourtSurface? PreferredSurface { get; set; }
+    }
+}
