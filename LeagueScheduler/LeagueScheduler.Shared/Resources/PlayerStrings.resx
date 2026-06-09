@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>Player Profile</value></data>
+  <data name="PageIntro" xml:space="preserve"><value>Tennis-specific information used for scheduling and league participation. All fields are optional.</value></data>
+  <data name="NavLink" xml:space="preserve"><value>Player Profile</value></data>
+  <data name="SaveSuccess" xml:space="preserve"><value>Player profile saved.</value></data>
+  <data name="SaveError" xml:space="preserve"><value>Failed to save player profile.</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>Not specified</value></data>
+
+  <data name="PrivacySectionTitle" xml:space="preserve"><value>Privacy &amp; Visibility</value></data>
+  <data name="PrivacyLevelLabel" xml:space="preserve"><value>Profile Visibility</value></data>
+  <data name="PrivacyLevelPublic" xml:space="preserve"><value>Public</value></data>
+  <data name="PrivacyLevelPublicHint" xml:space="preserve"><value>Visible to all players and league administrators.</value></data>
+  <data name="PrivacyLevelRestricted" xml:space="preserve"><value>Restricted</value></data>
+  <data name="PrivacyLevelRestrictedHint" xml:space="preserve"><value>Contact details visible only to members of leagues you belong to.</value></data>
+  <data name="PrivacyLevelPrivate" xml:space="preserve"><value>Private</value></data>
+  <data name="PrivacyLevelPrivateHint" xml:space="preserve"><value>Contact details not visible to others. Your display name is always shown to league members.</value></data>
+  <data name="ShowEmail" xml:space="preserve"><value>Show my email address to other players</value></data>
+
+  <data name="ContactSectionTitle" xml:space="preserve"><value>Contact</value></data>
+  <data name="PhoneNumber" xml:space="preserve"><value>Phone Number</value></data>
+  <data name="ShowPhone" xml:space="preserve"><value>Show my phone number to other players</value></data>
+  <data name="AddressSectionTitle" xml:space="preserve"><value>Address</value></data>
+  <data name="ShowAddress" xml:space="preserve"><value>Show my address to other players</value></data>
+  <data name="ShowCityPostalOnly" xml:space="preserve"><value>Show city and postal code only (not full street address)</value></data>
+
+  <data name="IdentitySectionTitle" xml:space="preserve"><value>Identity</value></data>
+  <data name="IdentityNote" xml:space="preserve"><value>Gender is optional and used only for mixed-doubles scheduling when a league requires it.</value></data>
+  <data name="GenderLabel" xml:space="preserve"><value>Gender</value></data>
+  <data name="GenderMale" xml:space="preserve"><value>Male</value></data>
+  <data name="GenderFemale" xml:space="preserve"><value>Female</value></data>
+  <data name="GenderNonBinary" xml:space="preserve"><value>Non-Binary</value></data>
+  <data name="GenderSelfDescribed" xml:space="preserve"><value>Prefer to self-describe</value></data>
+  <data name="GenderNotSpecified" xml:space="preserve"><value>Prefer not to say</value></data>
+  <data name="GenderDescription" xml:space="preserve"><value>Self-description</value></data>
+
+  <data name="RatingsSectionTitle" xml:space="preserve"><value>Tennis Ratings</value></data>
+  <data name="RatingsNote" xml:space="preserve"><value>All ratings are optional. They help league administrators create balanced matchups.</value></data>
+  <data name="NtrpRating" xml:space="preserve"><value>NTRP Rating</value></data>
+  <data name="NtrpRatingHint" xml:space="preserve"><value>National Tennis Rating Program scale (1.0–7.0). Check with your local tennis association or club to find your rating.</value></data>
+  <data name="WtnSingles" xml:space="preserve"><value>WTN Singles</value></data>
+  <data name="WtnSinglesHint" xml:space="preserve"><value>World Tennis Number for singles (1–40). Available via the ITF or your national tennis association.</value></data>
+  <data name="WtnDoubles" xml:space="preserve"><value>WTN Doubles</value></data>
+  <data name="WtnDoublesHint" xml:space="preserve"><value>World Tennis Number for doubles (1–40). Available via the ITF or your national tennis association.</value></data>
+  <data name="UtrRating" xml:space="preserve"><value>UTR</value></data>
+  <data name="UtrRatingHint" xml:space="preserve"><value>Universal Tennis Rating (1–16.xx). Available via the UTR website after logging match results.</value></data>
+
+  <data name="PrefsSectionTitle" xml:space="preserve"><value>Playing Preferences</value></data>
+  <data name="HandPreferenceLabel" xml:space="preserve"><value>Dominant Hand</value></data>
+  <data name="HandRight" xml:space="preserve"><value>Right</value></data>
+  <data name="HandLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="HandBoth" xml:space="preserve"><value>Both (two forehands)</value></data>
+  <data name="PreferredSideLabel" xml:space="preserve"><value>Preferred Court Side</value></data>
+  <data name="SideAd" xml:space="preserve"><value>Ad court (left side)</value></data>
+  <data name="SideDeuce" xml:space="preserve"><value>Deuce court (right side)</value></data>
+  <data name="PreferredSurfaceLabel" xml:space="preserve"><value>Preferred Surface</value></data>
+  <data name="SurfaceHard" xml:space="preserve"><value>Hard</value></data>
+  <data name="SurfaceClay" xml:space="preserve"><value>Clay</value></data>
+  <data name="SurfaceGrass" xml:space="preserve"><value>Grass</value></data>
+</root>

@@ -5,6 +5,7 @@ using LeagueScheduler.Client.Features.Auth;
 using LeagueScheduler.Client.Features.Courts;
 using LeagueScheduler.Client.Features.Admin.TimeZones;
 using LeagueScheduler.Client.Features.Users;
+using LeagueScheduler.Client.Features.Players;
 using LeagueScheduler.Client.Features.Leagues;
 using LeagueScheduler.Client.Features.Admin.Logs;
 using LeagueScheduler.Client.Features.Admin.Users;
@@ -49,6 +50,7 @@ builder.Services.AddScoped<CourtHistoryClient>();
 builder.Services.AddScoped<PronounsClient>();
 builder.Services.AddScoped<CountryClient>();
 builder.Services.AddScoped<MatchTypeClient>();
+builder.Services.AddScoped<PlayerProfileClient>();
 builder.Services.AddScoped<AdminUserClient>();
 
 var host = builder.Build();

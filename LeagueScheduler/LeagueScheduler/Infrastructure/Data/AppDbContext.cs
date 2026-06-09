@@ -1,4 +1,5 @@
 using LeagueScheduler.Features.Admin.Logs.Entities;
+using LeagueScheduler.Features.Players.Entities;
 using LeagueScheduler.Features.Admin.TimeZones.Entities;
 using LeagueScheduler.Features.Auth.Entities;
 using LeagueScheduler.Features.Common.Entities;
@@ -28,6 +29,7 @@ namespace LeagueScheduler.Infrastructure.Data
         }
 
         public DbSet<Address> Addresses => Set<Address>();
+        public DbSet<PlayerProfile> PlayerProfiles => Set<PlayerProfile>();
         public DbSet<Country> Countries => Set<Country>();
         public DbSet<CountryRegion> CountryRegions => Set<CountryRegion>();
         public DbSet<Court> Courts => Set<Court>();
